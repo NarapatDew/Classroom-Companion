@@ -1,0 +1,625 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+    Users,
+    TrendingUp,
+    AlertTriangle,
+    Copy,
+    CheckCircle,
+    MoreVertical,
+    BarChart2,
+    Clock,
+    LogOut,
+    ChevronDown,
+    Check
+} from 'lucide-react';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    PieChart as RePieChart,
+    Pie,
+    Cell,
+    Legend
+} from 'recharts';
+import {
+    fetchCourses,
+    fetchCourseStudents,
+    fetchCourseWork,
+    fetchTeacherSubmissions
+} from '../../services/googleClassroom';
+import type { Course, UserProfile } from '../../types';
+
+// --- Types ---
+interface TeacherDashboardProps {
+    onLogout: () => void;
+    accessToken?: string;
+    user?: UserProfile;
+}
+
+interface Assignment {
+    id: string;
+    title: string;
+    dueDate: string;
+    totalPoints: number;
+    averageScore: number;
+}
+
+interface Student {
+    id: string;
+    name: string;
+    avatarUrl: string;
+    overallGrade: number;
+    missingAssignmentsCount: number;
+}
+
+interface Submission {
+    studentId: string;
+    assignmentId: string;
+    status: 'TURNED_IN' | 'MISSING' | 'LATE' | 'ASSIGNED';
+    score?: number;
+}
+
+const StudentAvatar: React.FC<{ url: string; name: string; className?: string }> = ({ url, name, className }) => {
+    const [imgSrc, setImgSrc] = useState(url);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        setImgSrc(url);
+        setHasError(false);
+    }, [url]);
+
+    const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Student')}&background=random&color=fff&size=128`;
+
+    return (
+        <img
+            src={hasError || !imgSrc ? fallbackUrl : imgSrc}
+            alt={name}
+            className={className}
+            onError={() => setHasError(true)}
+        />
+    );
+};
+
+const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessToken, user }) => {
+    // --- State ---
+    const [loading, setLoading] = useState(false);
+    const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
+
+    // Data State
+    const [assignments, setAssignments] = useState<Assignment[]>([]);
+    const [students, setStudents] = useState<Student[]>([]);
+    const [submissions, setSubmissions] = useState<Submission[]>([]);
+    const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('');
+    const [copied, setCopied] = useState(false);
+
+    // Initial Fetch (Real Data)
+    useEffect(() => {
+        const loadRealData = async () => {
+            if (!accessToken) return;
+            setLoading(true);
+            try {
+                // 1. Fetch Courses
+                const realCourses = await fetchCourses(accessToken, 'me');
+                setCourses(realCourses);
+
+                if (realCourses.length > 0) {
+                    const firstCourseId = realCourses[0].id;
+                    setActiveCourseId(firstCourseId);
+
+                    // 2. Fetch Data for First Course
+                    await loadCourseData(accessToken, firstCourseId);
+                } else {
+                    // No courses found where user is teacher
+                    setAssignments([]);
+                    setStudents([]);
+                    setSubmissions([]);
+                }
+            } catch (err) {
+                console.error("Failed to load real data", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadRealData();
+    }, [accessToken]);
+
+    // Load Data for Specific Course
+    const loadCourseData = async (token: string, courseId: string) => {
+        setLoading(true);
+        try {
+            const [apiStudents, apiWork, apiSubs] = await Promise.all([
+                fetchCourseStudents(token, courseId),
+                fetchCourseWork(token, courseId),
+                fetchTeacherSubmissions(token, courseId)
+            ]);
+
+            // Transform Students
+            const realStudents: Student[] = apiStudents.map((s: any) => ({
+                id: s.userId,
+                name: s.profile?.name?.fullName || 'Unknown Student',
+                avatarUrl: s.profile?.photoUrl
+                    ? (s.profile.photoUrl.startsWith('http') ? s.profile.photoUrl : `https:${s.profile.photoUrl}`)
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.profile?.name?.fullName || 'Student')}&background=random&color=fff&size=128`,
+                overallGrade: 0,
+                missingAssignmentsCount: 0
+            }));
+
+            // Transform Assignments
+            const realAssignments: Assignment[] = apiWork.map((w: any) => ({
+                id: w.id,
+                title: w.title,
+                dueDate: w.dueDate ? `${w.dueDate.year}-${w.dueDate.month}-${w.dueDate.day}` : 'No Due Date',
+                totalPoints: w.maxPoints || 100,
+                averageScore: 0
+            }));
+
+            // Transform Submissions
+            const realSubmissions: Submission[] = apiSubs.map(s => {
+                let status: Submission['status'] = 'ASSIGNED';
+                if (s.state === 'TURNED_IN' || s.state === 'RETURNED') status = 'TURNED_IN';
+                else if (s.state === 'CREATED' || s.state === 'RECLAIMED_BY_STUDENT') {
+                    status = 'MISSING';
+                }
+
+                return {
+                    studentId: s.userId,
+                    assignmentId: s.courseWorkId,
+                    status: status,
+                    score: s.assignedGrade
+                };
+            });
+
+            // --- Calculate Derived Stats for Real Data ---
+            realAssignments.forEach(a => {
+                const aSubs = realSubmissions.filter(s => s.assignmentId === a.id && s.score !== undefined);
+                if (aSubs.length > 0) {
+                    const total = aSubs.reduce((sum, s) => sum + (s.score || 0), 0);
+                    a.averageScore = Math.round(total / aSubs.length);
+                }
+            });
+
+            realStudents.forEach(s => {
+                const sSubs = realSubmissions.filter(sub => sub.studentId === s.id);
+                s.missingAssignmentsCount = sSubs.filter(sub => sub.status === 'MISSING').length;
+
+                const gradedSubs = sSubs.filter(sub => sub.score !== undefined);
+                if (gradedSubs.length > 0) {
+                    const totalScore = gradedSubs.reduce((sum, sub) => sum + (sub.score || 0), 0);
+                    s.overallGrade = Math.round(totalScore / gradedSubs.length);
+                } else {
+                    s.overallGrade = 0;
+                }
+            });
+
+            setStudents(realStudents);
+            setAssignments(realAssignments);
+            setSubmissions(realSubmissions);
+
+            if (realAssignments.length > 0) {
+                setSelectedAssignmentId(realAssignments[0].id);
+            } else {
+                setSelectedAssignmentId('');
+            }
+
+        } catch (error) {
+            console.error("Error loading course details", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- Analytics Calculations ---
+    const stats = useMemo(() => {
+        const totalStudents = students.length;
+        if (totalStudents === 0) return { totalStudents: 0, classAverage: 0, atRiskCount: 0 };
+
+        const classAverage = Math.round(students.reduce((acc, s) => acc + s.overallGrade, 0) / totalStudents);
+        const atRiskCount = students.filter(s => s.overallGrade < 50 || s.missingAssignmentsCount > 2).length;
+        return { totalStudents, classAverage, atRiskCount };
+    }, [students]);
+
+    const selectedAssignment = assignments.find(a => a.id === selectedAssignmentId);
+    const activeCourse = courses.find(c => c.id === activeCourseId);
+
+    const assignmentSubmissionStats = useMemo(() => {
+        const relevantSubmissions = submissions.filter(s => s.assignmentId === selectedAssignmentId);
+        const late = relevantSubmissions.filter(s => s.status === 'LATE').length;
+        const missing = relevantSubmissions.filter(s => s.status === 'MISSING').length;
+        const turnedIn = relevantSubmissions.filter(s => s.status === 'TURNED_IN').length;
+
+        return [
+            { name: 'On Time', value: turnedIn, color: '#10b981' },
+            { name: 'Late', value: late, color: '#f59e0b' },
+            { name: 'Missing', value: missing, color: '#ef4444' }
+        ];
+    }, [selectedAssignmentId, submissions]);
+
+    const missingStudents = useMemo(() => {
+        const missingIds = submissions
+            .filter(s => s.assignmentId === selectedAssignmentId && s.status === 'MISSING')
+            .map(s => s.studentId);
+        return students.filter(s => missingIds.includes(s.id));
+    }, [selectedAssignmentId, submissions, students]);
+
+    // --- Actions ---
+    const handleCopyList = () => {
+        if (!selectedAssignment) return;
+
+        const names = missingStudents.map(s => s.name).join('\n• ');
+        const message = `📢 *Follow-up: ${selectedAssignment.title}* needs attention!\n\n⚠️ The following students are missing this assignment:\n• ${names}\n\n🕒 Please submit by tonight to avoid late penalties.`;
+
+        navigator.clipboard.writeText(message);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCourseChange = (courseId: string) => {
+        setActiveCourseId(courseId);
+        setIsCourseMenuOpen(false);
+        if (accessToken) {
+            loadCourseData(accessToken, courseId);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-slate-800">
+            {/* Top Navigation Bar */}
+            <header className="bg-white border-b border-gray-200 h-16 px-6 flex items-center justify-between sticky top-0 z-50">
+                <div className="flex items-center gap-3">
+                    <img src="/logos/dce_logo.png" alt="Department of Computer Education" className="h-10 w-auto" />
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-800">
+                            {activeCourse ? activeCourse.name : 'Teacher Dashboard'}
+                            <span className="text-gray-400 font-normal"> | CED E-Learning</span>
+                        </h1>
+                        {activeCourse && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                {activeCourse.section && <span>Section: {activeCourse.section}</span>}
+                                {activeCourse.section && activeCourse.room && <span>•</span>}
+                                {activeCourse.room && <span>Room: {activeCourse.room}</span>}
+                            </div>
+                        )}
+                        {loading && <span className="text-xs text-green-600 animate-pulse">Syncing data...</span>}
+                    </div>
+                </div>
+
+                {/* Custom Modern Course Selector */}
+                {accessToken && courses.length > 0 && (
+                    <div className="relative hidden md:block">
+                        <button
+                            onClick={() => setIsCourseMenuOpen(!isCourseMenuOpen)}
+                            className="bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-3 pl-4 pr-3 py-2 rounded-full cursor-pointer group"
+                        >
+                            <div className="flex flex-col text-left">
+                                <span className="text-sm font-bold text-gray-800 leading-tight">
+                                    {activeCourse ? activeCourse.name : 'Select Course'}
+                                </span>
+                                {activeCourse && (activeCourse.section || activeCourse.room) && (
+                                    <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wide">
+                                        {activeCourse.section ? `Sec ${activeCourse.section}` : ''}
+                                        {activeCourse.section && activeCourse.room ? ' • ' : ''}
+                                        {activeCourse.room ? `Room ${activeCourse.room}` : ''}
+                                    </span>
+                                )}
+                            </div>
+                            <ChevronDown
+                                size={16}
+                                className={`text-gray-500 transition-transform duration-200 ${isCourseMenuOpen ? 'rotate-180' : ''}`}
+                            />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isCourseMenuOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setIsCourseMenuOpen(false)}
+                                />
+                                <div className="absolute top-full mt-2 left-0 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-left">
+                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Classes</h3>
+                                    </div>
+                                    <div className="max-h-[320px] overflow-y-auto custom-scrollbar">
+                                        {courses.map(c => (
+                                            <button
+                                                key={c.id}
+                                                onClick={() => handleCourseChange(c.id)}
+                                                className={`w-full text-left px-4 py-3 hover:bg-green-50 transition-colors flex items-start gap-3 ${activeCourseId === c.id ? 'bg-green-50/50' : ''}`}
+                                            >
+                                                <div className={`p-2 rounded-full shrink-0 ${activeCourseId === c.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                    <Users size={16} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className={`font-semibold text-sm truncate ${activeCourseId === c.id ? 'text-green-700' : 'text-gray-700'}`}>
+                                                        {c.name}
+                                                    </div>
+                                                    {(c.section || c.room) && (
+                                                        <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                                            {c.section && <span>Sec {c.section}</span>}
+                                                            {c.section && c.room && <span>•</span>}
+                                                            {c.room && <span>Rm {c.room}</span>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {activeCourseId === c.id && (
+                                                    <Check size={16} className="text-green-600 mt-1" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onLogout}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+                    >
+                        <LogOut size={16} />
+                        Sign Out
+                    </button>
+                    {user?.photoUrl ? (
+                        <img src={user.photoUrl} alt="Profile" className="h-10 w-10 rounded-full border border-gray-200" />
+                    ) : (
+                        <div className="h-8 w-8 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 font-bold">
+                            T
+                        </div>
+                    )}
+                </div>
+            </header>
+
+            <main className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-8">
+
+                {/* 1. Overview Stats Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Total Students</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <h3 className="text-3xl font-bold">{stats.totalStudents}</h3>
+                                <span className="text-xs text-green-600 font-medium px-2 py-0.5 bg-green-50 rounded-full">Active</span>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                            <Users size={24} />
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Class Average</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <h3 className="text-3xl font-bold">{Number(stats.classAverage) || 0}%</h3>
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${stats.classAverage >= 70 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
+                                    <TrendingUp size={12} /> {stats.classAverage >= 70 ? 'Good' : 'Needs Focus'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-lg">
+                            <BarChart2 size={24} />
+                        </div>
+                    </div>
+
+                    <div className={`p-6 rounded-xl border shadow-sm flex items-center justify-between ${stats.atRiskCount > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
+                        <div>
+                            <p className={`text-sm font-medium uppercase tracking-wide ${stats.atRiskCount > 0 ? 'text-red-600' : 'text-gray-500'}`}>Attention Needed</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <h3 className={`text-3xl font-bold ${stats.atRiskCount > 0 ? 'text-red-700' : 'text-gray-800'}`}>{stats.atRiskCount}</h3>
+                                <span className="text-xs text-red-600/80 font-medium">Students At-Risk</span>
+                            </div>
+                        </div>
+                        <div className={`p-3 rounded-lg ${stats.atRiskCount > 0 ? 'bg-red-200 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                            <AlertTriangle size={24} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Rapid Follow-up & Analytics Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    {/* Left: Follow-up Generator & Pie Chart (5 cols) */}
+                    <div className="lg:col-span-5 space-y-6">
+                        {/* Follow-Up Tool */}
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+                                <Clock className="text-gray-400" size={18} />
+                                <h3 className="font-semibold text-gray-700">Rapid Follow-up</h3>
+                            </div>
+                            <div className="p-6">
+                                <label className="block text-sm font-medium text-gray-600 mb-2">Select Assignment to Chase</label>
+                                <div className="relative mb-6">
+                                    <select
+                                        className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none cursor-pointer"
+                                        value={selectedAssignmentId}
+                                        onChange={(e) => setSelectedAssignmentId(e.target.value)}
+                                    >
+                                        {assignments.length > 0 ? assignments.map(a => (
+                                            <option key={a.id} value={a.id}>{a.title}</option>
+                                        )) : <option>No Assignments Found</option>}
+                                    </select>
+                                    <div className="absolute right-3 top-3 pointer-events-none text-gray-500">
+                                        <MoreVertical size={16} />
+                                    </div>
+                                </div>
+
+                                <div className="bg-orange-50 rounded-lg p-4 mb-6 border border-orange-100">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs font-bold text-orange-800 uppercase">Missing: {missingStudents.length} Students</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {missingStudents.length > 0 ? (
+                                            missingStudents.map(s => (
+                                                <span key={s.id} className="text-xs bg-white border border-orange-200 text-orange-700 px-2 py-1 rounded-md shadow-sm">
+                                                    {s.name}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-sm text-green-600 flex items-center gap-1"><CheckCircle size={14} /> Everyone turned in!</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={handleCopyList}
+                                    disabled={missingStudents.length === 0}
+                                    className={`w-full py-3 px-4 rounded-lg font-bold shadow-md transition-all flex items-center justify-center gap-2 ${missingStudents.length === 0
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-green-600 hover:bg-green-700 text-white hover:shadow-lg active:scale-[0.98]'
+                                        }`}
+                                >
+                                    {copied ? <CheckCircle size={20} /> : <Copy size={20} />}
+                                    {copied ? 'Copied to Clipboard!' : 'Copy List for Line Group'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Submission Status Pie Chart */}
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 flex flex-col items-center">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 w-full text-left">Submission Status</h3>
+                            <div className="h-64 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RePieChart>
+                                        <Pie
+                                            data={assignmentSubmissionStats}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={80}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {assignmentSubmissionStats.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                        <Legend verticalAlign="bottom" height={36} />
+                                    </RePieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Charts & Roster (7 cols) */}
+                    <div className="lg:col-span-7 space-y-6">
+
+                        {/* Performance Chart */}
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="font-semibold text-gray-700">Assignment Performance History</h3>
+                                <div className="text-xs text-gray-500">Avg Score</div>
+                            </div>
+                            <div className="h-64">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={assignments}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis
+                                            dataKey="title"
+                                            tick={{ fontSize: 10 }}
+                                            tickFormatter={(val) => val.length > 15 ? `${val.substring(0, 15)}...` : val}
+                                        />
+                                        <YAxis />
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                        />
+                                        <Bar dataKey="averageScore" radius={[4, 4, 0, 0]}>
+                                            {assignments.map((entry) => (
+                                                <Cell key={`cell-${entry.id}`} fill={entry.averageScore < 60 ? '#ef4444' : '#3b82f6'} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Student Roster Table */}
+                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                            <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                                <h3 className="font-semibold text-gray-700">Student Roster</h3>
+                                <div className="text-xs text-gray-500">{students.length} Students</div>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+                                        <tr>
+                                            <th className="px-6 py-3">Student Name</th>
+                                            <th className="px-6 py-3">Overall Grade</th>
+                                            <th className="px-6 py-3 text-center">Missing Work</th>
+                                            <th className="px-6 py-3 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {students.length > 0 ? (
+                                            students.map((student) => {
+                                                const isAtRisk = student.overallGrade < 50 || student.missingAssignmentsCount >= 3;
+                                                return (
+                                                    <tr key={student.id} className={`hover:bg-gray-50 transition-colors ${isAtRisk ? 'bg-red-50/30' : ''}`}>
+                                                        <td className="px-6 py-4 flex items-center gap-3">
+                                                            <StudentAvatar url={student.avatarUrl} name={student.name} className="w-8 h-8 rounded-full bg-gray-200" />
+                                                            <span className="font-medium text-gray-700">{student.name}</span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                                    <div
+                                                                        className={`h-full rounded-full ${student.overallGrade >= 80 ? 'bg-green-500' : student.overallGrade >= 50 ? 'bg-blue-500' : 'bg-red-500'}`}
+                                                                        style={{ width: `${student.overallGrade}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-xs font-semibold">{student.overallGrade}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            {student.missingAssignmentsCount > 0 ? (
+                                                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 font-bold text-xs">
+                                                                    {student.missingAssignmentsCount}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-gray-400">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            {isAtRisk ? (
+                                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                                    <AlertTriangle size={12} /> At Risk
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                                                    <AlertTriangle size={12} className="hidden" /> On Track
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                                                    No students found in this course.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    );
+};
+
+export default TeacherDashboard;
