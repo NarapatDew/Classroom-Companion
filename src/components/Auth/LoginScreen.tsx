@@ -35,8 +35,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 setLoading(false);
             }
         },
-        onError: () => {
-            console.error('Login Failed');
+        onError: (error) => {
+            console.error('Login Failed', error);
+            // Log the current origin to help debug redirect URI issues
+            console.error('Current origin:', window.location.origin);
+            console.error('Make sure this origin is added to Google Cloud Console authorized redirect URIs');
             setLoading(false);
         },
         scope: 'https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.me.readonly https://www.googleapis.com/auth/classroom.rosters.readonly https://www.googleapis.com/auth/classroom.student-submissions.students.readonly https://www.googleapis.com/auth/classroom.profile.photos',

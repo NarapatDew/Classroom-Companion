@@ -271,108 +271,128 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-slate-800">
             {/* Top Navigation Bar */}
-            <header className="bg-white border-b border-gray-200 h-16 px-6 flex items-center justify-between sticky top-0 z-50">
-                <div className="flex items-center gap-3">
-                    <img src="/logos/dce_logo.png" alt="Department of Computer Education" className="h-10 w-auto" />
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-800">
-                            {activeCourse ? activeCourse.name : 'Teacher Dashboard'}
-                            <span className="text-gray-400 font-normal"> | CED E-Learning</span>
+            <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap md:flex-nowrap items-center justify-between sticky top-0 z-50 gap-y-4 shadow-sm">
+
+                {/* Left: Modern Prominent Course Selector */}
+                <div className="w-full md:w-1/3 flex justify-start order-2 md:order-1 relative z-50">
+                    {accessToken && courses.length > 0 ? (
+                        <div className="relative w-full max-w-[320px]">
+                            <button
+                                onClick={() => setIsCourseMenuOpen(!isCourseMenuOpen)}
+                                className="w-full bg-white hover:bg-gray-50 border-2 border-green-500/20 hover:border-green-500 flex items-center justify-between px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-green-500/10"
+                            >
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="bg-green-100 text-green-700 p-1.5 rounded-lg shrink-0">
+                                        <Users size={18} className="group-hover:scale-110 transition-transform" />
+                                    </div>
+                                    <div className="flex flex-col text-left overflow-hidden">
+                                        <span className="text-sm font-bold text-gray-800 truncate">
+                                            {activeCourse ? activeCourse.name : 'Select a Course'}
+                                        </span>
+                                        {activeCourse && (activeCourse.section || activeCourse.room) ? (
+                                            <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider truncate mt-0.5">
+                                                {activeCourse.section && `Sec ${activeCourse.section}`}
+                                                {activeCourse.section && activeCourse.room && <span className="mx-1">•</span>}
+                                                {activeCourse.room && `Room ${activeCourse.room}`}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[11px] font-medium text-gray-400 mt-0.5 animate-pulse">
+                                                {loading ? 'Syncing...' : 'Click to change class'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="shrink-0 bg-gray-100 p-1 rounded-md text-gray-500 group-hover:bg-green-100 group-hover:text-green-700 transition-colors ml-2">
+                                    <ChevronDown
+                                        size={18}
+                                        className={`transition-transform duration-300 ${isCourseMenuOpen ? 'rotate-180' : ''}`}
+                                    />
+                                </div>
+                            </button>
+
+                            {/* Dropdown Menu Overlay */}
+                            {isCourseMenuOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40 bg-gray-900/10 backdrop-blur-[1px] md:bg-transparent"
+                                        onClick={() => setIsCourseMenuOpen(false)}
+                                    />
+                                    <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="px-4 py-2.5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">My Classes</h3>
+                                            <span className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{courses.length}</span>
+                                        </div>
+                                        <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-1">
+                                            {courses.map(c => {
+                                                const isActive = activeCourseId === c.id;
+                                                return (
+                                                    <button
+                                                        key={c.id}
+                                                        onClick={() => handleCourseChange(c.id)}
+                                                        className={`w-full text-left px-3 py-3 my-1 rounded-lg transition-all duration-200 flex items-center justify-between group ${isActive ? 'bg-green-50/80 ring-1 ring-green-500/20' : 'hover:bg-gray-50'}`}
+                                                    >
+                                                        <div className="flex items-start gap-3 min-w-0 pr-2">
+                                                            <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-300 group-hover:bg-gray-400'}`} />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className={`font-semibold text-sm truncate leading-tight ${isActive ? 'text-green-800' : 'text-gray-700'}`}>
+                                                                    {c.name}
+                                                                </div>
+                                                                {(c.section || c.room) && (
+                                                                    <div className="text-[11px] text-gray-500 mt-1 flex items-center gap-1.5 font-medium">
+                                                                        {c.section && <span className="bg-gray-100 px-1.5 py-0.5 rounded">Sec {c.section}</span>}
+                                                                        {c.room && <span className="bg-gray-100 px-1.5 py-0.5 rounded">Rm {c.room}</span>}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        {isActive && (
+                                                            <div className="shrink-0 bg-green-100 text-green-600 p-1 rounded-full">
+                                                                <Check size={14} strokeWidth={3} />
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-sm text-gray-400 animate-pulse bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
+                            Loading your classes...
+                        </div>
+                    )}
+                </div>
+
+                {/* Center: Branding (Now serves as a subtle header logo) */}
+                <div className="flex items-center justify-center gap-3 w-full md:w-1/3 order-1 md:order-2 mb-2 md:mb-0">
+                    <img src="/logos/dce_logo.png" alt="Department of Computer Education" className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 transition-opacity" />
+                    <div className="hidden lg:block min-w-0 overflow-hidden text-center">
+                        <h1 className="text-sm font-bold text-gray-800 truncate leading-tight">
+                            Instructor Portal
                         </h1>
-                        {activeCourse && (
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                {activeCourse.section && <span>Section: {activeCourse.section}</span>}
-                                {activeCourse.section && activeCourse.room && <span>•</span>}
-                                {activeCourse.room && <span>Room: {activeCourse.room}</span>}
-                            </div>
-                        )}
-                        {loading && <span className="text-xs text-green-600 animate-pulse">Syncing data...</span>}
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">CED E-Learning</p>
                     </div>
                 </div>
 
-                {/* Custom Modern Course Selector */}
-                {accessToken && courses.length > 0 && (
-                    <div className="relative hidden md:block">
-                        <button
-                            onClick={() => setIsCourseMenuOpen(!isCourseMenuOpen)}
-                            className="bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-3 pl-4 pr-3 py-2 rounded-full cursor-pointer group"
-                        >
-                            <div className="flex flex-col text-left">
-                                <span className="text-sm font-bold text-gray-800 leading-tight">
-                                    {activeCourse ? activeCourse.name : 'Select Course'}
-                                </span>
-                                {activeCourse && (activeCourse.section || activeCourse.room) && (
-                                    <span className="text-[10px] uppercase font-semibold text-gray-500 tracking-wide">
-                                        {activeCourse.section ? `Sec ${activeCourse.section}` : ''}
-                                        {activeCourse.section && activeCourse.room ? ' • ' : ''}
-                                        {activeCourse.room ? `Room ${activeCourse.room}` : ''}
-                                    </span>
-                                )}
-                            </div>
-                            <ChevronDown
-                                size={16}
-                                className={`text-gray-500 transition-transform duration-200 ${isCourseMenuOpen ? 'rotate-180' : ''}`}
-                            />
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {isCourseMenuOpen && (
-                            <>
-                                <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={() => setIsCourseMenuOpen(false)}
-                                />
-                                <div className="absolute top-full mt-2 left-0 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-left">
-                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Your Classes</h3>
-                                    </div>
-                                    <div className="max-h-[320px] overflow-y-auto custom-scrollbar">
-                                        {courses.map(c => (
-                                            <button
-                                                key={c.id}
-                                                onClick={() => handleCourseChange(c.id)}
-                                                className={`w-full text-left px-4 py-3 hover:bg-green-50 transition-colors flex items-start gap-3 ${activeCourseId === c.id ? 'bg-green-50/50' : ''}`}
-                                            >
-                                                <div className={`p-2 rounded-full shrink-0 ${activeCourseId === c.id ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                                                    <Users size={16} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className={`font-semibold text-sm truncate ${activeCourseId === c.id ? 'text-green-700' : 'text-gray-700'}`}>
-                                                        {c.name}
-                                                    </div>
-                                                    {(c.section || c.room) && (
-                                                        <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-                                                            {c.section && <span>Sec {c.section}</span>}
-                                                            {c.section && c.room && <span>•</span>}
-                                                            {c.room && <span>Rm {c.room}</span>}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {activeCourseId === c.id && (
-                                                    <Check size={16} className="text-green-600 mt-1" />
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
-
-                <div className="flex items-center gap-4">
+                {/* Right: Actions & Profile */}
+                <div className="flex items-center justify-end w-full md:w-1/3 order-3 md:order-3 gap-3">
+                    {loading && <span className="hidden md:inline text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md animate-pulse">Syncing...</span>}
+                    <div className="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
                     <button
                         onClick={onLogout}
-                        className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+                        className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                        title="Sign Out"
                     >
-                        <LogOut size={16} />
-                        Sign Out
+                        <LogOut size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+                        <span className="hidden xl:inline text-sm font-semibold ml-2">Sign Out</span>
                     </button>
                     {user?.photoUrl ? (
-                        <img src={user.photoUrl} alt="Profile" className="h-10 w-10 rounded-full border border-gray-200" />
+                        <img src={user.photoUrl} alt="Profile" className="h-9 w-9 rounded-full border-2 border-gray-100 shadow-sm object-cover" />
                     ) : (
-                        <div className="h-8 w-8 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 font-bold">
-                            T
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white font-bold shadow-sm">
+                            {user?.name?.charAt(0) || 'T'}
                         </div>
                     )}
                 </div>
@@ -381,7 +401,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
             <main className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-8">
 
                 {/* 1. Overview Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Total Students</p>
@@ -395,20 +415,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">Class Average</p>
-                            <div className="flex items-baseline gap-2 mt-1">
-                                <h3 className="text-3xl font-bold">{Number(stats.classAverage) || 0}%</h3>
-                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${stats.classAverage >= 70 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
-                                    <TrendingUp size={12} /> {stats.classAverage >= 70 ? 'Good' : 'Needs Focus'}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="p-3 bg-yellow-50 text-yellow-600 rounded-lg">
-                            <BarChart2 size={24} />
-                        </div>
-                    </div>
+
 
                     <div className={`p-6 rounded-xl border shadow-sm flex items-center justify-between ${stats.atRiskCount > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
                         <div>

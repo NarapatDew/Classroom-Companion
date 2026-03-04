@@ -1,4 +1,48 @@
-# React + TypeScript + Vite
+# CED E-Learning Platform
+
+A React + TypeScript + Vite application for Google Classroom integration.
+
+## Quick Start
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Setup
+
+1. Create a `.env` file in the root directory:
+```env
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id
+```
+
+2. Get your Google OAuth Client ID from [Google Cloud Console](https://console.cloud.google.com/)
+
+### Running Locally
+
+```bash
+npm run dev
+```
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+## Google OAuth Configuration
+
+**Important:** If you're deploying to Vercel and encountering `redirect_uri_mismatch` errors, see [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md) for detailed setup instructions.
+
+**สำคัญ:** หากคุณกำลัง deploy ไปที่ Vercel และพบข้อผิดพลาด `redirect_uri_mismatch` ดู [GOOGLE_OAUTH_SETUP_TH.md](./GOOGLE_OAUTH_SETUP_TH.md) สำหรับคำแนะนำภาษาไทย
+
+Quick fix / วิธีแก้ไขเร็ว:
+1. เพิ่ม URL ของ Vercel ใน Google Cloud Console ในส่วน **Authorized JavaScript origins** และ **Authorized redirect URIs**
+2. ตรวจสอบว่า `VITE_GOOGLE_CLIENT_ID` ถูกตั้งค่าใน Vercel environment variables แล้ว
+3. รอสักครู่ (5-10 นาที) เพื่อให้การเปลี่ยนแปลงมีผล
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
