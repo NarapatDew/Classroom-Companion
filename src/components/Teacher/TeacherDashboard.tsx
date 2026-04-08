@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
     Users,
-    TrendingUp,
     AlertTriangle,
     Copy,
     CheckCircle,
     MoreVertical,
-    BarChart2,
     Clock,
     LogOut,
     ChevronDown,
