@@ -81,7 +81,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 xl:gap-4">
 
                     {/* Left Column: Stats & Courses */}
-                    <div className="md:col-span-9 space-y-6">
+                    <div className="md:col-span-12 lg:col-span-8 xl:col-span-9 space-y-6">
                         {/* Metrics Row */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <StatCard
@@ -111,17 +111,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                     </div>
                                 ) : (
                                     activeCourses.map(course => (
-                                        <div key={course.id} className="bg-white border border-border rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow cursor-pointer flex flex-col h-[280px]">
+                                        <div key={course.id} className="bg-white border border-border rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow cursor-pointer flex flex-col h-full min-h-[280px]">
                                             {/* Banner */}
-                                            <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600 p-4 relative">
+                                            <div className="min-h-[6.5rem] h-auto bg-gradient-to-r from-blue-600 to-indigo-600 p-4 pb-10 relative">
                                                 <div className="flex justify-between items-start">
-                                                    <h3 className="text-white font-medium text-xl hover:underline truncate w-[90%] pointer-events-none">
+                                                    <h3 className="text-white font-medium text-xl w-[85%] pointer-events-none text-balance line-clamp-2 leading-snug" title={course.name}>
                                                         <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="pointer-events-auto hover:underline">
                                                             {course.name}
                                                         </a>
                                                     </h3>
                                                 </div>
-                                                <p className="text-white/90 text-sm mt-1">{course.section}</p>
+                                                <p className="text-white/90 text-sm mt-1 line-clamp-2" title={course.section}>{course.section}</p>
 
                                                 <div className="absolute -bottom-8 right-4 w-16 h-16 bg-white rounded-full p-1 shadow-sm">
                                                     <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold text-xl">
@@ -186,10 +186,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                     {showArchivedCourses && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-4 opacity-80 hover:opacity-100 transition-opacity">
                                             {archivedCourses.map(course => (
-                                                <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-[200px]">
+                                                <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-full min-h-[200px]">
                                                     {/* Banner */}
-                                                    <div className="h-16 bg-gray-500 p-4 relative grayscale">
-                                                        <h3 className="text-white font-medium text-lg truncate w-[90%] pointer-events-none">
+                                                    <div className="min-h-[4rem] h-auto bg-gray-500 p-4 pb-6 relative grayscale">
+                                                        <h3 className="text-white font-medium text-lg text-balance line-clamp-2 w-[85%] pointer-events-none leading-snug" title={course.name}>
                                                             {course.name}
                                                         </h3>
 
@@ -219,7 +219,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                     </div>
 
                     {/* Right Column: Progress & Feed */}
-                    <div className="md:col-span-3 space-y-6">
+                    <div className="md:col-span-12 lg:col-span-4 xl:col-span-3 space-y-6">
 
                         {/* Global Progress */}
                         <div className="bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center">

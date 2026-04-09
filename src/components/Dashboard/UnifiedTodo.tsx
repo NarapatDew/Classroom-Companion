@@ -136,7 +136,7 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
 
     return (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-orange-100 text-orange-600 rounded-lg">
                         <CalendarDays size={20} />
@@ -144,7 +144,7 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                     <h3 className="font-bold text-gray-800 tracking-tight">{t('todo.title')}</h3>
                 </div>
                 {/* Filters */}
-                <div className="flex bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
+                <div className="grid grid-cols-2 min-[350px]:grid-cols-4 lg:flex lg:flex-wrap bg-gray-100 p-1 rounded-lg w-full gap-1">
                     {[
                         { key: 'ALL', label: t('todo.filterAll') },
                         { key: 'TODAY', label: t('todo.filterToday') },
@@ -154,7 +154,7 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                         <button
                             key={f.key}
                             onClick={() => setFilter(f.key as FilterType)}
-                            className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${filter === f.key ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex-1 px-1 sm:px-2 py-1.5 text-[10px] sm:text-xs font-semibold rounded-md transition-all whitespace-nowrap text-center ${filter === f.key ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             {f.label}
                         </button>
@@ -174,13 +174,13 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                                 className="block bg-white border border-gray-100 p-3 rounded-lg shadow-sm hover:shadow-md hover:border-orange-200 transition-all group"
                             >
                                 <div className="flex justify-between items-start">
-                                    <div className="min-w-0 pr-3">
-                                        <h4 className="text-sm font-bold text-gray-800 line-clamp-1 group-hover:text-primary transition-colors">
+                                    <div className="min-w-0 pr-3 flex-1">
+                                        <h4 className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-primary transition-colors pr-2" title={a.title}>
                                             {a.title}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colorClasses[a.courseColor]}`}>
-                                                {a.courseName.length > 20 ? a.courseName.substring(0,20)+'...' : a.courseName}
+                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colorClasses[a.courseColor]} truncate max-w-[120px] sm:max-w-[150px]`} title={a.courseName}>
+                                                {a.courseName}
                                             </span>
                                             {getStatusBadge(a)}
                                         </div>
