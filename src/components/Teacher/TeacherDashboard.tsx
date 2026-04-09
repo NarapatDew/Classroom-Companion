@@ -365,12 +365,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
 
                 {/* Center: Branding (Now serves as a subtle header logo) */}
                 <div className="flex items-center justify-center gap-3 w-full md:w-1/3 order-1 md:order-2 mb-2 md:mb-0">
-                    <img src="/logos/dce_logo.png" alt="Department of Computer Education" className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 transition-opacity" />
+                    <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 transition-opacity" />
                     <div className="hidden lg:block min-w-0 overflow-hidden text-center">
                         <h1 className="text-sm font-bold text-gray-800 truncate leading-tight">
-                            Instructor Portal
+                            Classroom Companion
                         </h1>
-                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">CED E-Learning</p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Instructor Workspace</p>
                     </div>
                 </div>
 

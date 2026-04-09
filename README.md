@@ -1,6 +1,51 @@
-# CED E-Learning Platform
+# Classroom Companion
 
-A React + TypeScript + Vite application for Google Classroom integration.
+**Tagline:** Google Classroom, made simpler.
+
+Classroom Companion is a third-party React + TypeScript + Vite app that helps students and instructors use Google Classroom with a cleaner workflow and easier-to-read dashboards.
+
+> Disclaimer: Classroom Companion is an independent third-party tool and is not affiliated with, endorsed by, or sponsored by Google.
+
+## What This App Does
+
+- Connects to Google Classroom using OAuth
+- Brings courses, coursework, submissions, and roster data into one interface
+- Highlights actionable insights (missing work, at-risk students, assignment performance)
+- Speeds up follow-up messaging and day-to-day classroom operations
+
+## Core Product Principles
+
+- **Clarity first**: show the most important actions and metrics without noise
+- **Action over data dump**: every dashboard block should help users decide what to do next
+- **Companion, not replacement**: this app extends Google Classroom workflows, not replaces them
+- **Consistent language**: use the same UI terms across student and instructor views
+
+## UI Identity Recommendations
+
+### Color System (Suggested)
+
+- **Primary**: Emerald (`#059669`) for key actions and positive workflow states
+- **Primary Dark**: Emerald deep (`#047857`) for emphasis and hover states
+- **Accent**: Orange (`#EA580C`) for highlights and section identity
+- **Warning**: Amber (`#F59E0B`) for late/needs-attention states
+- **Danger**: Red (`#DC2626`) for missing/at-risk states
+- **Neutral**: Slate/Gray range for content structure and readability
+
+### UI Vocabulary (Suggested Standards)
+
+Use these labels consistently to make the product feel like one system:
+
+- **Student side**
+  - `Student Workspace`
+  - `Overall Progress`
+  - `Upcoming Work`
+  - `On Track` / `Needs Attention`
+- **Instructor side**
+  - `Instructor Workspace`
+  - `Rapid Follow-up`
+  - `Submission Status`
+  - `Assignment Performance`
+  - `At-Risk Students`
 
 ## Quick Start
 

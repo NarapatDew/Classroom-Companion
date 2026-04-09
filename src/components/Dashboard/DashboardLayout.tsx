@@ -39,19 +39,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             <header className="bg-white border-b border-border py-3 px-6 flex flex-col md:flex-row items-center justify-between sticky top-0 z-50 shadow-sm bg-gradient-to-r from-white via-orange-50/30 to-white">
                 <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
                     <div className="flex items-center gap-3 border-r border-orange-200 pr-6 mr-2">
-                        <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-12 w-auto hover:scale-105 transition-transform" />
-                        <img src="/logos/fte_logo.png" alt="FTE" className="h-12 w-auto hover:scale-105 transition-transform" />
-                        <img src="/logos/dce_logo.png" alt="DCE" className="h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
+                        <img src="/logos/kmutnb_logo.png" alt="Partner logo 1" className="h-12 w-auto hover:scale-105 transition-transform" />
+                        <img src="/logos/fte_logo.png" alt="Partner logo 2" className="h-12 w-auto hover:scale-105 transition-transform" />
+                        <img src="/logos/dce_logo.png" alt="Partner logo 3" className="h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
                     </div>
                     <div className="hidden lg:flex flex-col justify-center">
-                        <h1 className="text-lg font-bold text-gray-800 leading-none">ภาควิชาคอมพิวเตอร์ศึกษา</h1>
-                        <h2 className="text-sm font-semibold text-orange-600">Department of Computer Education</h2>
-                        <p className="text-[10px] text-muted font-medium uppercase tracking-wide">Faculty of Technical Education, KMUTNB</p>
+                        <h1 className="text-lg font-bold text-gray-800 leading-none">Classroom Companion</h1>
+                        <h2 className="text-sm font-semibold text-orange-600">Google Classroom, made simpler.</h2>
+                        <p className="text-[10px] text-muted font-medium uppercase tracking-wide">Student Workspace</p>
                     </div>
                     {/* Mobile/Tablet Compact View */}
                     <div className="lg:hidden flex flex-col">
-                        <span className="text-lg font-bold text-gray-800">CED</span>
-                        <span className="text-xs text-orange-600 font-medium">KMUTNB</span>
+                        <span className="text-lg font-bold text-gray-800">Companion</span>
+                        <span className="text-xs text-orange-600 font-medium">Student View</span>
                     </div>
                 </div>
 

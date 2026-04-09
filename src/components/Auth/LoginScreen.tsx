@@ -69,19 +69,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
                     <div className="z-10 w-full flex flex-col items-center">
                         <div className="flex items-center gap-3 mb-8">
-                            <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-12 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm" />
-                            <img src="/logos/fte_logo.png" alt="FTE" className="h-12 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm" />
-                            <img src="/logos/dce_logo.png" alt="DCE" className="h-14 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm drop-shadow-md" />
+                            <img src="/logos/kmutnb_logo.png" alt="Partner logo 1" className="h-12 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm" />
+                            <img src="/logos/fte_logo.png" alt="Partner logo 2" className="h-12 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm" />
+                            <img src="/logos/dce_logo.png" alt="Partner logo 3" className="h-14 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm drop-shadow-md" />
                         </div>
                         <h1 className="text-3xl font-extrabold mb-2 leading-tight tracking-tight">
-                            ภาควิชาคอมพิวเตอร์ศึกษา
+                            Classroom Companion
                         </h1>
-                        <h2 className="text-lg font-medium text-emerald-100 mb-6 font-sans">
-                            Department of Computer Education
+                        <h2 className="text-lg font-medium text-emerald-100 mb-4 font-sans">
+                            Google Classroom, made simpler.
                         </h2>
                         <p className="text-sm text-emerald-50/80 leading-relaxed font-light">
-                            Faculty of Technical Education<br />
-                            King Mongkut's University of Technology North Bangkok
+                            A third-party workspace that helps students and instructors
+                            manage classroom workflows faster and with clearer insights.
                         </p>
                     </div>
 
@@ -90,7 +90,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             System
                         </div>
                         <div className="text-4xl font-black text-white tracking-tighter shadow-sm">
-                            CED E-Learning
+                            Classroom Companion
                         </div>
                     </div>
                 </div>
@@ -130,13 +130,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             onClick={handleTeacherLogin}
                             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-800 to-green-900 text-white hover:from-emerald-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all px-6 py-3.5 rounded-xl font-medium text-sm group"
                         >
-                            <span>Access Instructor Portal</span>
+                            <span>Open Instructor Workspace</span>
                             <span className="bg-emerald-600/30 text-[10px] px-1.5 py-0.5 rounded text-emerald-100 border border-emerald-500/30">Teacher Mode</span>
                         </button>
                     </div>
 
                     <p className="mt-12 text-xs text-gray-400 text-center">
-                        &copy; {new Date().getFullYear()} CED KMUTNB. All rights reserved.
+                        Classroom Companion is a third-party app and is not affiliated with Google.
                     </p>
                 </div>
             </div>
