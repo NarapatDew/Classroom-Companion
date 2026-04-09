@@ -5,7 +5,7 @@ import ProgressRing from './ProgressRing';
 import AssignmentTimeline from './AssignmentTimeline';
 import UnifiedTodo from './UnifiedTodo';
 import CourseTrendDashboard from './CourseTrendDashboard';
-import { Folder, Award } from 'lucide-react';
+import { Folder, Award, ExternalLink, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
 
@@ -20,6 +20,7 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assignments, submissions, onLogout }) => {
     const { language, t } = useLanguage();
     const [showArchivedCourses, setShowArchivedCourses] = useState(false);
+    const [showActiveCourses, setShowActiveCourses] = useState(true);
     // Calculate Global Completion
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
@@ -77,13 +78,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 xl:gap-4">
-
-                    {/* Left Column: Stats & Courses */}
-                    <div className="md:col-span-12 lg:col-span-8 xl:col-span-9 space-y-6">
-                        {/* Metrics Row */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full flex flex-col space-y-6">
+                
+                {/* Top Row: Metrics (Always on top) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <StatCard
                                 title={t('dashboard.completedAssignments')}
                                 value={completedAssignments}
@@ -101,20 +99,44 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             />
                         </div>
 
-                        {/* Active Courses Grid */}
-                        <div>
-                            <h2 className="text-lg font-medium text-text mb-4">{t('dashboard.activeCourses')}</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-4 mb-10">
-                                {activeCourses.length === 0 ? (
+                        {/* Dashboard Grid Container: Mobile reverse, Desktop grid */}
+                        <div className="flex flex-col-reverse lg:grid lg:grid-cols-12 gap-6 xl:gap-4">
+
+                            {/* Left Column: Courses & Analytics (Bottom on Mobile) */}
+                            <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+
+                                {/* Active Courses Grid */}
+                                <div>
+                                    <div className="mb-4 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-medium text-text">{t('dashboard.activeCourses')}</h2>
+                                        <button
+                                            onClick={() => setShowActiveCourses(prev => !prev)}
+                                            className="text-xs font-semibold text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                                        >
+                                            {showActiveCourses
+                                                ? (language === 'th' ? 'ซ่อน' : 'Hide')
+                                                : (language === 'th' ? `แสดง (${activeCourses.length})` : `Show (${activeCourses.length})`)}
+                                        </button>
+                                    </div>
+                                    
+                                    <div className={`transition-all duration-300 ${!showActiveCourses ? 'hidden' : ''}`}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-4 mb-10">
+                                            {activeCourses.length === 0 ? (
                                     <div className="col-span-full h-32 flex items-center justify-center bg-white border border-border border-dashed rounded-lg text-muted">
                                         {language === 'th' ? 'ไม่พบรายวิชาที่เปิดใช้งาน' : 'No active courses found.'}
                                     </div>
                                 ) : (
                                     activeCourses.map(course => (
-                                        <div key={course.id} className="bg-white border border-border rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-shadow cursor-pointer flex flex-col h-full min-h-[280px]">
+                                        <div key={course.id} className="group bg-white border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-xl hover:border-blue-300 hover:ring-1 hover:ring-blue-300 transition-all duration-300 cursor-pointer flex flex-col h-full min-h-[280px] hover:-translate-y-1 relative">
+                                            {/* Invisible clickable overlay for the whole card */}
+                                            <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0 text-transparent" aria-hidden="true" tabIndex={-1}>&nbsp;</a>
+                                            
                                             {/* Banner */}
-                                            <div className="min-h-[6.5rem] h-auto bg-gradient-to-r from-blue-600 to-indigo-600 p-4 pb-10 relative">
-                                                <div className="flex justify-between items-start">
+                                            <div className="min-h-[6.5rem] h-auto bg-gradient-to-r from-blue-600 to-indigo-600 p-4 pb-10 relative overflow-hidden">
+                                                {/* Decorative background glow on hover */}
+                                                <div className="absolute -right-4 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 group-hover:scale-150 transition-all duration-700 pointer-events-none z-0"></div>
+                                                
+                                                <div className="flex justify-between items-start relative z-10">
                                                     <h3 className="text-white font-medium text-xl w-[85%] pointer-events-none text-balance line-clamp-2 leading-snug" title={course.name}>
                                                         <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="pointer-events-auto hover:underline">
                                                             {course.name}
@@ -138,9 +160,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                                     </p>
                                                     <div className="mt-2 space-y-2">
                                                         {assignments.filter(a => a.courseId === course.id).slice(0, 2).map(a => (
-                                                            <a key={a.id} href={a.alternateLink} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary truncate flex items-center gap-2 block">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-muted"></span>
-                                                                {a.title}
+                                                            <a key={a.id} href={a.alternateLink} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary truncate flex items-center gap-2 block relative z-10 group/item">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-muted group-hover/item:bg-primary transition-colors"></span>
+                                                                <span className="group-hover/item:underline">{a.title}</span>
                                                             </a>
                                                         ))}
                                                         {assignments.filter(a => a.courseId === course.id).length === 0 && (
@@ -149,16 +171,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                                     </div>
                                                 </div>
 
-                                                <div className="border-t border-border pt-3 flex justify-end gap-2">
-                                                    <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                                                <div className="border-t border-border pt-4 mt-2 flex justify-between items-center relative z-10">
+                                                    {/* Hint text that fades in on hover */}
+                                                    <span className="text-[10px] sm:text-xs text-orange-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1 -translate-x-2 group-hover:translate-x-0 pointer-events-none">
+                                                        <ChevronRight size={14} /> 
+                                                        {language === 'th' ? 'ไปที่ห้องเรียน' : 'Go to Class'}
+                                                    </span>
+
+                                                    {/* Styled Button */}
+                                                    <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary bg-blue-50 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md transition-colors duration-300 flex items-center gap-1.5 shadow-sm group-hover:shadow min-w-max">
                                                         {language === 'th' ? 'เปิดใน Classroom' : 'Open in Classroom'}
+                                                        <ExternalLink size={12} className="opacity-70" />
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
                                     ))
                                 )}
-                            </div>
+                                        </div>
+                                    </div>
 
                             {/* Course Trend Analytics */}
                             {activeCourses.length > 0 && submissions.length > 0 && (
