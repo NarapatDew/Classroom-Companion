@@ -30,6 +30,7 @@ import {
     fetchTeacherSubmissions
 } from '../../services/googleClassroom';
 import type { Course, UserProfile } from '../../types';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // --- Types ---
 interface TeacherDashboardProps {
@@ -83,6 +84,7 @@ const StudentAvatar: React.FC<{ url: string; name: string; className?: string }>
 };
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessToken, user }) => {
+    const { language, toggleLanguage, t } = useLanguage();
     // --- State ---
     const [loading, setLoading] = useState(false);
     const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
@@ -368,23 +370,29 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                     <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 transition-opacity" />
                     <div className="hidden lg:block min-w-0 overflow-hidden text-center">
                         <h1 className="text-sm font-bold text-gray-800 truncate leading-tight">
-                            Classroom Companion
+                            {t('brand.name')}
                         </h1>
-                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Instructor Workspace</p>
+                        <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('dashboard.instructorWorkspace')}</p>
                     </div>
                 </div>
 
                 {/* Right: Actions & Profile */}
                 <div className="flex items-center justify-end w-full md:w-1/3 order-3 md:order-3 gap-3">
+                    <button
+                        onClick={toggleLanguage}
+                        className="text-xs font-semibold text-gray-600 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
+                    >
+                        {language === 'th' ? 'EN' : 'ไทย'}
+                    </button>
                     {loading && <span className="hidden md:inline text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md animate-pulse">Syncing...</span>}
                     <div className="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
                     <button
                         onClick={onLogout}
                         className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
-                        title="Sign Out"
+                        title={t('dashboard.signOut')}
                     >
                         <LogOut size={20} className="group-hover:-translate-x-0.5 transition-transform" />
-                        <span className="hidden xl:inline text-sm font-semibold ml-2">Sign Out</span>
+                        <span className="hidden xl:inline text-sm font-semibold ml-2">{t('dashboard.signOut')}</span>
                     </button>
                     {user?.photoUrl ? (
                         <img src={user.photoUrl} alt="Profile" className="h-9 w-9 rounded-full border-2 border-gray-100 shadow-sm object-cover" />

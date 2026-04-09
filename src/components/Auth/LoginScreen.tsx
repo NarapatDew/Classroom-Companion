@@ -3,6 +3,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import type { UserProfile } from '../../types';
 import { fetchUserProfile } from '../../services/googleClassroom';
 import TeacherDashboard from '../Teacher/TeacherDashboard';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface LoginScreenProps {
     onLogin: (user: UserProfile, accessToken: string) => void;
@@ -14,6 +15,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     const [isTeacherLogin, setIsTeacherLogin] = useState(false);
     const [teacherProfile, setTeacherProfile] = useState<UserProfile | null>(null);
     const [teacherToken, setTeacherToken] = useState<string | null>(null);
+    const { language, toggleLanguage, t } = useLanguage();
 
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -56,6 +58,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#e6fcf5] via-[#f0fdf4] to-[#ecfdf5]">
+            <button
+                onClick={toggleLanguage}
+                className="absolute top-4 right-4 z-20 bg-white/90 hover:bg-white text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
+            >
+                {t('app.switchLanguage')}: {language === 'th' ? 'EN' : 'ไทย'}
+            </button>
             {/* Ambient Background Blobs */}
             <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
             <div className="absolute top-10 right-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -74,14 +82,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             <img src="/logos/dce_logo.png" alt="Partner logo 3" className="h-14 w-auto bg-white/20 rounded-full p-1 backdrop-blur-sm drop-shadow-md" />
                         </div>
                         <h1 className="text-3xl font-extrabold mb-2 leading-tight tracking-tight">
-                            Classroom Companion
+                            {t('brand.name')}
                         </h1>
                         <h2 className="text-lg font-medium text-emerald-100 mb-4 font-sans">
-                            Google Classroom, made simpler.
+                            {t('brand.tagline')}
                         </h2>
                         <p className="text-sm text-emerald-50/80 leading-relaxed font-light">
-                            A third-party workspace that helps students and instructors
-                            manage classroom workflows faster and with clearer insights.
+                            {language === 'th'
+                                ? 'พื้นที่ทำงานแบบ third-party ที่ช่วยให้นักศึกษาและผู้สอนจัดการงานในชั้นเรียนได้ง่ายขึ้นและเห็นภาพชัดขึ้น'
+                                : 'A third-party workspace that helps students and instructors manage classroom workflows faster and with clearer insights.'}
                         </p>
                     </div>
 
@@ -98,8 +107,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 {/* Right Side: Login Form */}
                 <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                     <div className="text-center md:text-left mb-10">
-                        <h2 className="text-2xl font-bold text-gray-800">Welcome Back!</h2>
-                        <p className="text-gray-500 mt-2 text-sm">Please sign in to access your classroom.</p>
+                        <h2 className="text-2xl font-bold text-gray-800">{t('login.welcome')}</h2>
+                        <p className="text-gray-500 mt-2 text-sm">{t('login.subtitle')}</p>
                     </div>
 
                     <div className="space-y-4">
@@ -114,14 +123,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             ) : (
                                 <>
                                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                                    <span className="font-semibold text-base">Sign in with Google</span>
+                                    <span className="font-semibold text-base">{t('login.googleSignIn')}</span>
                                 </>
                             )}
                         </button>
 
                         <div className="relative flex py-2 items-center">
                             <div className="flex-grow border-t border-gray-200"></div>
-                            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase tracking-wider">Instructors</span>
+                            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase tracking-wider">{t('login.instructor')}</span>
                             <div className="flex-grow border-t border-gray-200"></div>
                         </div>
 
@@ -130,13 +139,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             onClick={handleTeacherLogin}
                             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-800 to-green-900 text-white hover:from-emerald-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all px-6 py-3.5 rounded-xl font-medium text-sm group"
                         >
-                            <span>Open Instructor Workspace</span>
-                            <span className="bg-emerald-600/30 text-[10px] px-1.5 py-0.5 rounded text-emerald-100 border border-emerald-500/30">Teacher Mode</span>
+                            <span>{t('login.openInstructor')}</span>
+                            <span className="bg-emerald-600/30 text-[10px] px-1.5 py-0.5 rounded text-emerald-100 border border-emerald-500/30">{t('login.teacherMode')}</span>
                         </button>
                     </div>
 
                     <p className="mt-12 text-xs text-gray-400 text-center">
-                        Classroom Companion is a third-party app and is not affiliated with Google.
+                        {t('brand.disclaimer')}
                     </p>
                 </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from './DashboardLayout';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import { fetchCourses, fetchAllAssignments, fetchAllSubmissions } from '../../services/googleClassroom';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface DashboardProps {
     user: UserProfile;
@@ -15,6 +16,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, accessToken, onLogout }) =>
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { language, t } = useLanguage();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, accessToken, onLogout }) =>
             <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-muted font-sans font-medium text-sm">Syncing with Google Classroom...</p>
+                    <p className="text-muted font-sans font-medium text-sm">{t('dashboard.syncing')}</p>
                 </div>
             </div>
         );
@@ -67,9 +69,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, accessToken, onLogout }) =>
         return (
             <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-lg shadow-card border border-red-200 max-w-md w-full text-center">
-                    <div className="text-red-500 font-bold mb-2">Connection Error</div>
+                    <div className="text-red-500 font-bold mb-2">{t('dashboard.connectionError')}</div>
                     <p className="text-sm text-muted mb-4">{error}</p>
-                    <button onClick={onLogout} className="text-primary hover:underline text-sm">Return to Login</button>
+                    <button onClick={onLogout} className="text-primary hover:underline text-sm">{t('dashboard.returnToLogin')}</button>
                 </div>
             </div>
         );
@@ -79,14 +81,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user, accessToken, onLogout }) =>
         <div className='relative'>
             {courses.length === 0 && (
                 <div className="bg-white border border-yellow-200 p-8 text-center mb-4 mx-6 mt-6 rounded shadow-sm">
-                    <h3 className="text-lg font-medium text-text mb-2">No Courses Found</h3>
+                    <h3 className="text-lg font-medium text-text mb-2">{t('dashboard.noCourses')}</h3>
                     <p className="text-muted text-sm max-w-md mx-auto">
-                        We couldn't find any active courses for <strong>{user.email}</strong>.
+                        {language === 'th'
+                            ? <>ไม่พบรายวิชาที่เปิดใช้งานสำหรับบัญชี <strong>{user.email}</strong></>
+                            : <>We couldn't find any active courses for <strong>{user.email}</strong>.</>}
                     </p>
                     <div className="mt-4 text-xs text-muted">
-                        Tip: Make sure you are using the correct account and are enrolled in at least one course.
+                        {language === 'th'
+                            ? 'คำแนะนำ: ตรวจสอบว่าใช้บัญชีถูกต้องและมีการลงทะเบียนอย่างน้อย 1 รายวิชา'
+                            : 'Tip: Make sure you are using the correct account and are enrolled in at least one course.'}
                     </div>
-                    <button onClick={onLogout} className="mt-6 text-primary hover:underline text-sm">Sign in with a different account</button>
+                    <button onClick={onLogout} className="mt-6 text-primary hover:underline text-sm">
+                        {language === 'th' ? 'เข้าสู่ระบบด้วยบัญชีอื่น' : 'Sign in with a different account'}
+                    </button>
                 </div>
             )}
             {courses.length > 0 && (

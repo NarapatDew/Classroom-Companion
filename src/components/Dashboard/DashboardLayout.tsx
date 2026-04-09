@@ -4,6 +4,7 @@ import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
 import AssignmentTimeline from './AssignmentTimeline';
 import { Folder, Award } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface DashboardLayoutProps {
     user: UserProfile;
@@ -14,6 +15,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assignments, submissions, onLogout }) => {
+    const { language, toggleLanguage, t } = useLanguage();
     // Calculate Global Completion
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
@@ -45,22 +47,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                     </div>
                     <div className="hidden lg:flex flex-col justify-center">
                         <h1 className="text-lg font-bold text-gray-800 leading-none">Classroom Companion</h1>
-                        <h2 className="text-sm font-semibold text-orange-600">Google Classroom, made simpler.</h2>
-                        <p className="text-[10px] text-muted font-medium uppercase tracking-wide">Student Workspace</p>
+                        <h2 className="text-sm font-semibold text-orange-600">{t('brand.tagline')}</h2>
+                        <p className="text-[10px] text-muted font-medium uppercase tracking-wide">{t('dashboard.studentWorkspace')}</p>
                     </div>
                     {/* Mobile/Tablet Compact View */}
                     <div className="lg:hidden flex flex-col">
                         <span className="text-lg font-bold text-gray-800">Companion</span>
-                        <span className="text-xs text-orange-600 font-medium">Student View</span>
+                        <span className="text-xs text-orange-600 font-medium">{language === 'th' ? 'มุมมองนักศึกษา' : 'Student View'}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-end">
                     <button
+                        onClick={toggleLanguage}
+                        className="text-xs font-semibold text-gray-600 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
+                    >
+                        {language === 'th' ? 'EN' : 'ไทย'}
+                    </button>
+                    <button
                         onClick={onLogout}
                         className="text-sm font-medium text-muted hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 transition-colors mr-2"
                     >
-                        Sign Out
+                        {t('dashboard.signOut')}
                     </button>
 
                     <img src={user.photoUrl} alt="Profile" className="w-8 h-8 rounded-full border border-border cursor-pointer hover:ring-2 hover:ring-gray-200" />
@@ -76,17 +84,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                         {/* Metrics Row */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <StatCard
-                                title="Completed Assignments"
+                                title={t('dashboard.completedAssignments')}
                                 value={completedAssignments}
                                 icon={Award}
                             />
                             <StatCard
-                                title="Active Courses"
+                                title={t('dashboard.activeCourses')}
                                 value={activeCourses.length}
                                 icon={Folder}
                             />
                             <StatCard
-                                title="Achievements"
+                                title={t('dashboard.achievements')}
                                 value={achievementsCount}
                                 icon={Award}
                             />
@@ -94,11 +102,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                         {/* Active Courses Grid */}
                         <div>
-                            <h2 className="text-lg font-medium text-text mb-4">Active Courses</h2>
+                            <h2 className="text-lg font-medium text-text mb-4">{t('dashboard.activeCourses')}</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                                 {activeCourses.length === 0 ? (
                                     <div className="col-span-full h-32 flex items-center justify-center bg-white border border-border border-dashed rounded-lg text-muted">
-                                        No active courses found.
+                                        {language === 'th' ? 'ไม่พบรายวิชาที่เปิดใช้งาน' : 'No active courses found.'}
                                     </div>
                                 ) : (
                                     activeCourses.map(course => (
@@ -133,7 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                                             </a>
                                                         ))}
                                                         {assignments.filter(a => a.courseId === course.id).length === 0 && (
-                                                            <span className="text-sm text-muted italic">Woohoo, no work due!</span>
+                                                            <span className="text-sm text-muted italic">{language === 'th' ? 'ยอดเยี่ยม! ไม่มีงานที่ต้องส่ง' : 'Woohoo, no work due!'}</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -153,7 +161,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             {archivedCourses.length > 0 && (
                                 <>
                                     <h2 className="text-lg font-medium text-muted mb-4 flex items-center gap-2">
-                                        <Folder className="w-5 h-5" /> Archived Courses
+                                        <Folder className="w-5 h-5" /> {language === 'th' ? 'วิชาที่เก็บถาวร' : 'Archived Courses'}
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80 hover:opacity-100 transition-opacity">
                                         {archivedCourses.map(course => (
@@ -174,9 +182,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                                 {/* Body */}
                                                 <div className="p-4 pt-8 flex-1 flex flex-col justify-end">
                                                     <div className="border-t border-border pt-3 flex justify-between items-center">
-                                                        <span className="text-xs text-muted italic">Archived</span>
+                                                        <span className="text-xs text-muted italic">{language === 'th' ? 'เก็บถาวร' : 'Archived'}</span>
                                                         <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-muted hover:underline flex items-center gap-1">
-                                                            View Class
+                                                            {language === 'th' ? 'ดูชั้นเรียน' : 'View Class'}
                                                         </a>
                                                     </div>
                                                 </div>
@@ -193,10 +201,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                         {/* Global Progress */}
                         <div className="bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center">
-                            <h3 className="text-muted text-xs font-medium uppercase tracking-wider mb-4">Overall Progress</h3>
+                            <h3 className="text-muted text-xs font-medium uppercase tracking-wider mb-4">{t('dashboard.overallProgress')}</h3>
                             <ProgressRing percentage={globalCompletion} color="#188038" size={140} strokeWidth={8} />
                             <p className="mt-4 text-center text-sm text-text">
-                                You're doing great! Keep keeping up.
+                                {language === 'th' ? 'ทำได้ดีมาก รักษาความต่อเนื่องไว้!' : "You're doing great! Keep keeping up."}
                             </p>
                         </div>
 
