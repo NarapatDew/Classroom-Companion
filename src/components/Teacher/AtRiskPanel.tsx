@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Search, Filter } from 'lucide-react';
+import { AlertTriangle, Search } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface AtRiskStudent {
@@ -16,7 +16,7 @@ interface AtRiskPanelProps {
 }
 
 const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students }) => {
-    const { language, t } = useLanguage();
+    const { language } = useLanguage();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState<'ALL' | 'MISSING' | 'GRADE'>('ALL');
 

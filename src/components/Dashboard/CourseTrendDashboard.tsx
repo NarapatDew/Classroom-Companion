@@ -11,7 +11,7 @@ interface CourseTrendDashboardProps {
 }
 
 const CourseTrendDashboard: React.FC<CourseTrendDashboardProps> = ({ courses, assignments, submissions }) => {
-    const { language, t } = useLanguage();
+    const { language } = useLanguage();
 
     const chartData = useMemo(() => {
         // Group assignments by creation month/week or just take the last 5 assignments chronologically per course

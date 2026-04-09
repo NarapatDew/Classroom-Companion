@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
-import AssignmentTimeline from './AssignmentTimeline';
 import UnifiedTodo from './UnifiedTodo';
 import CourseTrendDashboard from './CourseTrendDashboard';
 import { Folder, Award, ExternalLink, ChevronRight } from 'lucide-react';

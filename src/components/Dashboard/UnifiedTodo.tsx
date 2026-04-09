@@ -18,7 +18,6 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
     // Parse and process assignments to enrich with submission and course data
     const enhancedAssignments = useMemo(() => {
         const now = new Date();
-        const todayStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 
         return assignments.map(assignment => {
             // Find related course
@@ -58,7 +57,7 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                 dueDateObj,
                 daysUntilDue,
                 isPastDue,
-                courseColor: course?.name.charCodeAt(0) % 5 || 0 // deterministic pseudo-random color class index
+                courseColor: (course?.name?.charCodeAt(0) ?? 0) % 5 || 0 // deterministic pseudo-random color class index
             };
         }).filter(a => !a.isTurnedIn); // Only show ones that are NOT turned in
     }, [assignments, courses, submissions]);

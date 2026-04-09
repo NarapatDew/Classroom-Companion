@@ -27,7 +27,7 @@ const templates = [
 ];
 
 const MessageTemplates: React.FC = () => {
-    const { language, t } = useLanguage();
+    const { language } = useLanguage();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     const handleCopy = (id: string, content: string) => {
