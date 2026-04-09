@@ -4,6 +4,7 @@ import type { UserProfile } from '../../types';
 import { fetchUserProfile } from '../../services/googleClassroom';
 import TeacherDashboard from '../Teacher/TeacherDashboard';
 import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageToggle from '../common/LanguageToggle';
 
 interface LoginScreenProps {
     onLogin: (user: UserProfile, accessToken: string) => void;
@@ -15,7 +16,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     const [isTeacherLogin, setIsTeacherLogin] = useState(false);
     const [teacherProfile, setTeacherProfile] = useState<UserProfile | null>(null);
     const [teacherToken, setTeacherToken] = useState<string | null>(null);
-    const { language, toggleLanguage, t } = useLanguage();
+    const { language, t } = useLanguage();
 
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -58,12 +59,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#e6fcf5] via-[#f0fdf4] to-[#ecfdf5]">
-            <button
-                onClick={toggleLanguage}
-                className="absolute top-4 right-4 z-20 bg-white/90 hover:bg-white text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
-            >
-                {t('app.switchLanguage')}: {language === 'th' ? 'EN' : 'ไทย'}
-            </button>
+            <LanguageToggle className="absolute right-4 top-4 z-20" />
             {/* Ambient Background Blobs */}
             <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
             <div className="absolute top-10 right-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>

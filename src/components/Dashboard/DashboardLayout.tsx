@@ -5,6 +5,7 @@ import ProgressRing from './ProgressRing';
 import AssignmentTimeline from './AssignmentTimeline';
 import { Folder, Award } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageToggle from '../common/LanguageToggle';
 
 interface DashboardLayoutProps {
     user: UserProfile;
@@ -15,7 +16,7 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assignments, submissions, onLogout }) => {
-    const { language, toggleLanguage, t } = useLanguage();
+    const { language, t } = useLanguage();
     // Calculate Global Completion
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
@@ -58,12 +59,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                 </div>
 
                 <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-end">
-                    <button
-                        onClick={toggleLanguage}
-                        className="text-xs font-semibold text-gray-600 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
-                    >
-                        {language === 'th' ? 'EN' : 'ไทย'}
-                    </button>
+                    <LanguageToggle />
                     <button
                         onClick={onLogout}
                         className="text-sm font-medium text-muted hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 transition-colors mr-2"

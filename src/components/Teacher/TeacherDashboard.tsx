@@ -31,6 +31,7 @@ import {
 } from '../../services/googleClassroom';
 import type { Course, UserProfile } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageToggle from '../common/LanguageToggle';
 
 // --- Types ---
 interface TeacherDashboardProps {
@@ -84,7 +85,7 @@ const StudentAvatar: React.FC<{ url: string; name: string; className?: string }>
 };
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessToken, user }) => {
-    const { language, toggleLanguage, t } = useLanguage();
+    const { language, t } = useLanguage();
     // --- State ---
     const [loading, setLoading] = useState(false);
     const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
@@ -378,12 +379,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
 
                 {/* Right: Actions & Profile */}
                 <div className="flex items-center justify-end w-full md:w-1/3 order-3 md:order-3 gap-3">
-                    <button
-                        onClick={toggleLanguage}
-                        className="text-xs font-semibold text-gray-600 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50"
-                    >
-                        {language === 'th' ? 'EN' : 'ไทย'}
-                    </button>
+                    <LanguageToggle />
                     {loading && <span className="hidden md:inline text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md animate-pulse">{language === 'th' ? 'กำลังซิงก์...' : 'Syncing...'}</span>}
                     <div className="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
                     <button
