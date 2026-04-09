@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
@@ -17,6 +17,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assignments, submissions, onLogout }) => {
     const { language, t } = useLanguage();
+    const [showArchivedCourses, setShowArchivedCourses] = useState(false);
     // Calculate Global Completion
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
@@ -158,37 +159,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             {/* Archived Courses */}
                             {archivedCourses.length > 0 && (
                                 <>
-                                    <h2 className="text-lg font-medium text-muted mb-4 flex items-center gap-2">
-                                        <Folder className="w-5 h-5" /> {language === 'th' ? 'วิชาที่เก็บถาวร' : 'Archived Courses'}
-                                    </h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80 hover:opacity-100 transition-opacity">
-                                        {archivedCourses.map(course => (
-                                            <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-[200px]">
-                                                {/* Banner */}
-                                                <div className="h-16 bg-gray-500 p-4 relative grayscale">
-                                                    <h3 className="text-white font-medium text-lg truncate w-[90%] pointer-events-none">
-                                                        {course.name}
-                                                    </h3>
+                                    <div className="mb-4 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-medium text-muted flex items-center gap-2">
+                                            <Folder className="w-5 h-5" /> {language === 'th' ? 'วิชาที่เก็บถาวร' : 'Archived Courses'}
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowArchivedCourses(prev => !prev)}
+                                            className="text-xs font-semibold text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50"
+                                        >
+                                            {showArchivedCourses
+                                                ? (language === 'th' ? 'ซ่อนรายการ' : 'Hide')
+                                                : (language === 'th' ? `ดูรายการ (${archivedCourses.length})` : `Show (${archivedCourses.length})`)}
+                                        </button>
+                                    </div>
+                                    {showArchivedCourses && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80 hover:opacity-100 transition-opacity">
+                                            {archivedCourses.map(course => (
+                                                <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-[200px]">
+                                                    {/* Banner */}
+                                                    <div className="h-16 bg-gray-500 p-4 relative grayscale">
+                                                        <h3 className="text-white font-medium text-lg truncate w-[90%] pointer-events-none">
+                                                            {course.name}
+                                                        </h3>
 
-                                                    <div className="absolute -bottom-6 right-4 w-12 h-12 bg-white rounded-full p-1 shadow-sm">
-                                                        <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
-                                                            {course.name.charAt(0)}
+                                                        <div className="absolute -bottom-6 right-4 w-12 h-12 bg-white rounded-full p-1 shadow-sm">
+                                                            <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
+                                                                {course.name.charAt(0)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Body */}
+                                                    <div className="p-4 pt-8 flex-1 flex flex-col justify-end">
+                                                        <div className="border-t border-border pt-3 flex justify-between items-center">
+                                                            <span className="text-xs text-muted italic">{language === 'th' ? 'เก็บถาวร' : 'Archived'}</span>
+                                                            <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-muted hover:underline flex items-center gap-1">
+                                                                {language === 'th' ? 'ดูชั้นเรียน' : 'View Class'}
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {/* Body */}
-                                                <div className="p-4 pt-8 flex-1 flex flex-col justify-end">
-                                                    <div className="border-t border-border pt-3 flex justify-between items-center">
-                                                        <span className="text-xs text-muted italic">{language === 'th' ? 'เก็บถาวร' : 'Archived'}</span>
-                                                        <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-muted hover:underline flex items-center gap-1">
-                                                            {language === 'th' ? 'ดูชั้นเรียน' : 'View Class'}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
