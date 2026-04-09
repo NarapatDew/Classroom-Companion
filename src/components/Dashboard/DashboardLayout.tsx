@@ -132,7 +132,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                             {/* Body */}
                                             <div className="p-4 pt-10 flex-1 flex flex-col">
                                                 <div className="flex-1">
-                                                    <p className="text-xs text-muted font-medium uppercase mt-2">Assignments Due</p>
+                                                    <p className="text-xs text-muted font-medium uppercase mt-2">
+                                                        {language === 'th' ? 'งานที่ต้องส่ง' : 'Assignments Due'}
+                                                    </p>
                                                     <div className="mt-2 space-y-2">
                                                         {assignments.filter(a => a.courseId === course.id).slice(0, 2).map(a => (
                                                             <a key={a.id} href={a.alternateLink} target="_blank" rel="noopener noreferrer" className="text-sm text-muted hover:text-primary truncate flex items-center gap-2 block">
@@ -148,7 +150,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                                                 <div className="border-t border-border pt-3 flex justify-end gap-2">
                                                     <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-                                                        Open in Classroom
+                                                        {language === 'th' ? 'เปิดใน Classroom' : 'Open in Classroom'}
                                                     </a>
                                                 </div>
                                             </div>

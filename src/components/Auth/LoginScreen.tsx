@@ -89,7 +89,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         </h2>
                         <p className="text-sm text-emerald-50/80 leading-relaxed font-light">
                             {language === 'th'
-                                ? 'พื้นที่ทำงานแบบ third-party ที่ช่วยให้นักศึกษาและผู้สอนจัดการงานในชั้นเรียนได้ง่ายขึ้นและเห็นภาพชัดขึ้น'
+                                ? 'เครื่องมือเสริมที่ช่วยให้ผู้เรียนและผู้สอนจัดการงานในชั้นเรียนได้ง่ายขึ้น และเห็นข้อมูลสำคัญได้ชัดเจนขึ้น'
                                 : 'A third-party workspace that helps students and instructors manage classroom workflows faster and with clearer insights.'}
                         </p>
                     </div>
