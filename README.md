@@ -20,6 +20,10 @@ Classroom Companion is a third-party React + TypeScript + Vite app that helps st
 - **Companion, not replacement**: this app extends Google Classroom workflows, not replaces them
 - **Consistent language**: use the same UI terms across student and instructor views
 
+## Product Planning
+
+- Thai product roadmap and sprint-ready backlog: [PRODUCT_ROADMAP_TH.md](./PRODUCT_ROADMAP_TH.md)
+
 ## UI Identity Recommendations
 
 ### Color System (Suggested)
