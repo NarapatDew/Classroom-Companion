@@ -12,7 +12,7 @@ interface UnifiedTodoProps {
 type FilterType = 'ALL' | 'TODAY' | '3DAYS' | '7DAYS';
 
 const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [filter, setFilter] = useState<FilterType>('ALL');
 
     // Parse and process assignments to enrich with submission and course data
@@ -121,7 +121,7 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
     };
 
     const formatDueDate = (date: Date | null) => {
-        if (!date) return '-';
+        if (!date) return language === 'th' ? 'ไม่มีกำหนดส่ง' : 'No due date';
         return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
 

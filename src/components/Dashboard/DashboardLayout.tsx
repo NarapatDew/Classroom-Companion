@@ -193,7 +193,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             {/* Course Trend Analytics */}
                             {activeCourses.length > 0 && submissions.length > 0 && (
                                 <div className="mb-10">
-                                    <CourseTrendDashboard courses={courses} assignments={assignments} submissions={submissions} />
+                                    <CourseTrendDashboard courses={activeCourses} assignments={assignments} submissions={submissions} />
                                 </div>
                             )}
 
@@ -218,12 +218,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                             {archivedCourses.map(course => (
                                                 <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-full min-h-[200px]">
                                                     {/* Banner */}
-                                                    <div className="min-h-[4rem] h-auto bg-gray-500 p-4 pb-6 relative grayscale">
-                                                        <h3 className="text-white font-medium text-lg text-balance line-clamp-2 w-[85%] pointer-events-none leading-snug" title={course.name}>
+                                                    <div 
+                                                        className="min-h-[4rem] h-auto p-4 pb-6 relative grayscale overflow-hidden bg-cover bg-center"
+                                                        style={{
+                                                            backgroundImage: ((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl)
+                                                                ? `url(${((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl)})`
+                                                                : undefined,
+                                                            backgroundColor: (course as any).courseGroupTheme?.themeColor || '#6b7280'
+                                                        }}
+                                                    >
+                                                        {/* Dark overlay for readability if image exists */}
+                                                        {((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl) && (
+                                                            <div className="absolute inset-0 bg-black/40"></div>
+                                                        )}
+                                                        <h3 className="text-white font-medium text-lg text-balance line-clamp-2 w-[85%] relative z-10 pointer-events-none leading-snug" title={course.name}>
                                                             {course.name}
                                                         </h3>
 
-                                                        <div className="absolute -bottom-6 right-4 w-12 h-12 bg-white rounded-full p-1 shadow-sm">
+                                                        <div className="absolute -bottom-6 right-4 w-12 h-12 bg-white rounded-full p-1 shadow-sm z-10">
                                                             <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
                                                                 {course.name.charAt(0)}
                                                             </div>
