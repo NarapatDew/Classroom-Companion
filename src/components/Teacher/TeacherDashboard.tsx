@@ -272,7 +272,8 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-slate-800">
             {/* Top Navigation Bar */}
-            <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap md:flex-nowrap items-center justify-between sticky top-0 z-50 gap-y-4 shadow-sm">
+            <header className="bg-white border-b border-gray-200 px-4 md:px-6 xl:px-4 py-3 sticky top-0 z-50 gap-y-4 shadow-sm">
+                <div className="w-full max-w-6xl 2xl:max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-y-4">
 
                 {/* Left: Modern Prominent Course Selector */}
                 <div className="w-full md:w-1/3 flex justify-start order-2 md:order-1 relative z-50">
@@ -398,12 +399,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                         </div>
                     )}
                 </div>
+                </div>
             </header>
 
-            <main className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-8">
+            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full space-y-8">
 
                 {/* 1. Overview Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:gap-4">
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">{language === 'th' ? 'นักเรียนทั้งหมด' : 'Total Students'}</p>
@@ -434,7 +436,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                 </div>
 
                 {/* 2. Rapid Follow-up & Analytics Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-4">
 
                     {/* Left: Follow-up Generator & Pie Chart (5 cols) */}
                     <div className="lg:col-span-5 space-y-6">

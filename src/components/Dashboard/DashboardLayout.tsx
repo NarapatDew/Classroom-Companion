@@ -40,7 +40,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     return (
         <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
             {/* Department Header */}
-            <header className="bg-white border-b border-border py-3 px-6 flex flex-col md:flex-row items-center justify-between sticky top-0 z-50 shadow-sm bg-gradient-to-r from-white via-orange-50/30 to-white">
+            <header className="bg-white border-b border-border py-3 px-4 md:px-6 xl:px-4 sticky top-0 z-50 shadow-sm bg-gradient-to-r from-white via-orange-50/30 to-white">
+                <div className="w-full max-w-6xl 2xl:max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
                 <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
                     <div className="flex items-center gap-3 border-r border-orange-200 pr-6 mr-2">
                         <img src="/logos/kmutnb_logo.png" alt="Partner logo 1" className="h-12 w-auto hover:scale-105 transition-transform" />
@@ -70,11 +71,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                     <img src={user.photoUrl} alt="Profile" className="w-8 h-8 rounded-full border border-border cursor-pointer hover:ring-2 hover:ring-gray-200" />
                 </div>
+                </div>
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 xl:gap-4">
 
                     {/* Left Column: Stats & Courses */}
                     <div className="md:col-span-9 space-y-6">
@@ -100,7 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                         {/* Active Courses Grid */}
                         <div>
                             <h2 className="text-lg font-medium text-text mb-4">{t('dashboard.activeCourses')}</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-4 mb-10">
                                 {activeCourses.length === 0 ? (
                                     <div className="col-span-full h-32 flex items-center justify-center bg-white border border-border border-dashed rounded-lg text-muted">
                                         {language === 'th' ? 'ไม่พบรายวิชาที่เปิดใช้งาน' : 'No active courses found.'}
@@ -173,7 +175,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                         </button>
                                     </div>
                                     {showArchivedCourses && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80 hover:opacity-100 transition-opacity">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-4 opacity-80 hover:opacity-100 transition-opacity">
                                             {archivedCourses.map(course => (
                                                 <div key={course.id} className="bg-gray-50 border border-border rounded-lg overflow-hidden flex flex-col h-[200px]">
                                                     {/* Banner */}
