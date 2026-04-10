@@ -6,9 +6,10 @@ import { useLanguage } from '../../contexts/LanguageContext';
 interface SmartCompanionProps {
     assignments: Assignment[];
     submissions: Submission[];
+    onEnterFocusMode?: (assignment: Assignment) => void;
 }
 
-const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submissions }) => {
+const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submissions, onEnterFocusMode }) => {
     const { language } = useLanguage();
 
     const advice = useMemo(() => {
@@ -55,6 +56,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                     ? `หยิบ "${missingTasks[0].title}" ขึ้นมาทำก่อนเลย งานนี้เลยกำหนดมาแล้ว!`
                     : `Focus on "${missingTasks[0].title}" first. It's past due!`,
                 actionLink: missingTasks[0].alternateLink,
+                targetAssignment: missingTasks[0],
                 icon: AlertCircle,
                 colors: 'bg-white border border-red-100 border-l-[6px] border-l-red-500 shadow-[0_4px_20px_-4px_rgba(220,38,38,0.1)]',
                 titleColor: 'text-red-800',
@@ -75,6 +77,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                     ? `อย่าลืมเคลียร์ "${target.title}" ที่กำลังจะมาถึงในอีก ${target.daysUntilDue === 0 ? 'วันนี้' : target.daysUntilDue + ' วัน'}`
                     : `Keep an eye on "${target.title}" due in ${target.daysUntilDue === 0 ? 'today' : target.daysUntilDue + ' days'}.`,
                 actionLink: target.alternateLink,
+                targetAssignment: target,
                 icon: Clock,
                 colors: 'bg-white border border-amber-100 border-l-[6px] border-l-amber-400 shadow-[0_4px_20px_-4px_rgba(217,119,6,0.1)]',
                 titleColor: 'text-amber-900',
@@ -92,6 +95,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                 ? 'คุณจัดการงานทุกชิ้นได้หมดจด ไม่มีงานค้างและไม่มีงานด่วน พักผ่อนให้เต็มที่เลยคนเก่ง!'
                 : 'All clear! You have zero missing tasks and no urgent deadlines. Enjoy your time!',
             actionLink: null,
+            targetAssignment: null,
             icon: Sparkles,
             colors: 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 border-0 shadow-[0_15px_40px_-10px_rgba(217,70,239,0.5)] bg-[length:200%_auto] animate-gradient',
             titleColor: 'text-white text-shadow-sm',
@@ -116,8 +120,15 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                         <p className={`text-sm leading-relaxed max-w-xl ${advice.descColor}`}>{advice.message}</p>
                     </div>
                 </div>
-                
-                {advice.actionLink && (
+                {advice.targetAssignment && onEnterFocusMode ? (
+                    <button 
+                        onClick={() => onEnterFocusMode(advice.targetAssignment as Assignment)}
+                        className={`shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 z-10 ${advice.btnColors}`}
+                    >
+                        {language === 'th' ? 'เข้าสู่ Focus Mode' : 'Enter Focus Mode'}
+                        <ArrowRight size={16} strokeWidth={2.5} />
+                    </button>
+                ) : advice.actionLink ? (
                     <a 
                         href={advice.actionLink}
                         target="_blank"
@@ -127,7 +138,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                         {language === 'th' ? 'จัดการทันที' : 'Handle Now'}
                         <ArrowRight size={16} strokeWidth={2.5} />
                     </a>
-                )}
+                ) : null}
             </div>
             
             {/* Minimalist Watermark / Celebration Confetti */}

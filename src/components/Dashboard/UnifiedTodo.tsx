@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import type { Course, Assignment, Submission } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Clock, AlertTriangle, CalendarDays, ExternalLink, Calendar } from 'lucide-react';
+import { Clock, AlertTriangle, CalendarDays, ExternalLink, Calendar, Target } from 'lucide-react';
 
 interface UnifiedTodoProps {
     courses: Course[];
     assignments: Assignment[];
     submissions: Submission[];
+    onEnterFocusMode?: (assignment: Assignment) => void;
 }
 
 type FilterType = 'ALL' | 'TODAY' | '3DAYS' | '7DAYS';
 
-const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions }) => {
+const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions, onEnterFocusMode }) => {
     const { t, language } = useLanguage();
     const [filter, setFilter] = useState<FilterType>('ALL');
 
@@ -185,15 +186,26 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
             <div className="p-2 flex-1 overflow-y-auto custom-scrollbar bg-gray-50/30">
                 {filteredAssignments.length > 0 ? (
                     <div className="space-y-2">
-                        {filteredAssignments.map((a) => (
-                            <a
-                                key={a.id}
-                                href={a.alternateLink || '#'}
-                                target={a.alternateLink ? "_blank" : undefined}
-                                rel="noopener noreferrer"
-                                className="flex flex-col bg-white border border-gray-100 p-3.5 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 group relative"
-                            >
-                                <div className="flex justify-between items-start gap-4">
+                        {filteredAssignments.map((a) => {
+                            const isFocusable = !!onEnterFocusMode;
+                            
+                            const handleClick = (e: React.MouseEvent) => {
+                                if (isFocusable) {
+                                    e.preventDefault();
+                                    onEnterFocusMode(a);
+                                }
+                            };
+
+                            return (
+                                <a
+                                    key={a.id}
+                                    href={a.alternateLink || '#'}
+                                    target={!isFocusable && a.alternateLink ? "_blank" : undefined}
+                                    rel="noopener noreferrer"
+                                    onClick={handleClick}
+                                    className="flex flex-col bg-white border border-gray-100 p-3.5 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 group relative"
+                                >
+                                    <div className="flex justify-between items-start gap-4">
                                     <div className="min-w-0 flex-1">
                                         <h4 className="text-[14px] leading-tight font-bold text-gray-800 group-hover:text-primary transition-colors pr-2 break-words" title={a.title}>
                                             {a.title}
@@ -210,13 +222,14 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                                             {formatDueDate(a.dueDateObj)}
                                         </span>
                                         
-                                        <div className="mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white bg-blue-600 px-2 py-1 rounded-md shadow-md">
-                                            {t('todo.open')} <ExternalLink size={12} />
+                                        <div className={`mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white px-2 py-1 rounded-md shadow-md ${isFocusable ? 'bg-indigo-600' : 'bg-blue-600'}`}>
+                                            {isFocusable ? (language === 'th' ? 'เข้าสู่ Focus Mode' : 'Focus Mode') : t('todo.open')} 
+                                            {isFocusable ? <Target size={12} /> : <ExternalLink size={12} />}
                                         </div>
                                     </div>
                                 </div>
                             </a>
-                        ))}
+                        )})}
                     </div>
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400">

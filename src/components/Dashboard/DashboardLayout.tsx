@@ -4,6 +4,7 @@ import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
 import SmartCompanion from './SmartCompanion';
+import FocusMode from './FocusMode';
 
 import { Folder, AlertTriangle, ExternalLink, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -21,6 +22,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     const { language, t } = useLanguage();
     const [showArchivedCourses, setShowArchivedCourses] = useState(false);
     const [showActiveCourses, setShowActiveCourses] = useState(true);
+    const [focusAssignment, setFocusAssignment] = useState<Assignment | null>(null);
+
     // Calculate Global Completion
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
@@ -104,7 +107,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                         {/* Proactive Smart Companion Assistant */}
                         <div className="w-full">
-                            <SmartCompanion assignments={activeAssignments} submissions={submissions} />
+                            <SmartCompanion assignments={activeAssignments} submissions={submissions} onEnterFocusMode={setFocusAssignment} />
                         </div>
 
                         {/* Dashboard Grid Container: Mobile reverse, Desktop grid */}
@@ -278,12 +281,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
 
                         {/* Unified Todo List */}
                         <div className="h-[500px]">
-                            <UnifiedTodo courses={activeCourses} assignments={activeAssignments} submissions={submissions} />
+                            <UnifiedTodo courses={activeCourses} assignments={activeAssignments} submissions={submissions} onEnterFocusMode={setFocusAssignment} />
                         </div>
                     </div>
 
                 </div>
             </main>
+            
+            {/* Global Focus Mode Overlay */}
+            {focusAssignment && (
+                <FocusMode assignment={focusAssignment} onClose={() => setFocusAssignment(null)} />
+            )}
         </div>
     );
 };
