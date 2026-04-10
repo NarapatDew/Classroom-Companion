@@ -6,7 +6,7 @@ export interface AtRiskStudent {
     id: string;
     name: string;
     avatarUrl: string;
-    overallGrade: number;
+    completedAssignmentsCount?: number;
     missingAssignmentsCount: number;
     courseName?: string;
 }
@@ -21,7 +21,7 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students }) => {
     const [filterType, setFilterType] = useState<'ALL' | 'MISSING' | 'GRADE'>('ALL');
 
     // Filter to only at-risk logic
-    const atRiskStudents = students.filter(s => s.overallGrade < 50 || s.missingAssignmentsCount >= 2);
+    const atRiskStudents = students.filter(s => s.missingAssignmentsCount >= 2);
 
     const filteredAndSearched = atRiskStudents.filter(s => {
         const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -29,19 +29,15 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students }) => {
             ? true 
             : filterType === 'MISSING' 
                 ? s.missingAssignmentsCount >= 2 
-                : s.overallGrade < 50;
+                : true;
         return matchesSearch && matchesFilter;
     });
 
     const getReason = (s: AtRiskStudent) => {
-        const reasons = [];
         if (s.missingAssignmentsCount >= 2) {
-            reasons.push(language === 'th' ? `ค้างส่ง ${s.missingAssignmentsCount} งาน` : `Missing ${s.missingAssignmentsCount} work`);
+            return language === 'th' ? `ค้างส่ง ${s.missingAssignmentsCount} งาน` : `Missing ${s.missingAssignmentsCount} tasks`;
         }
-        if (s.overallGrade < 50) {
-            reasons.push(language === 'th' ? `คะแนนเฉลี่ย ${s.overallGrade}%` : `Low avg ${s.overallGrade}%`);
-        }
-        return reasons.join(' และ ');
+        return '';
     };
 
     return (
@@ -71,9 +67,8 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students }) => {
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value as any)}
                 >
-                    <option value="ALL">{language === 'th' ? 'สาเหตุทั้งหมด' : 'All Reasons'}</option>
-                    <option value="MISSING">{language === 'th' ? 'ค้างส่งงานเยอะ' : 'High Missing Work'}</option>
-                    <option value="GRADE">{language === 'th' ? 'คะแนนต่ำ' : 'Low Grades'}</option>
+                    <option value="ALL">{language === 'th' ? 'นักเรียนกลุ่มเสี่ยงทั้งหมด' : 'All At-Risk'}</option>
+                    <option value="MISSING">{language === 'th' ? 'ค้างส่งงาน (2+ งาน)' : 'Missing Tasks (2+)'}</option>
                 </select>
             </div>
 

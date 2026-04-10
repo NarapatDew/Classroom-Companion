@@ -4,7 +4,7 @@ import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
 
-import { Folder, Award, ExternalLink, ChevronRight } from 'lucide-react';
+import { Folder, Award, AlertTriangle, ExternalLink, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
 
@@ -25,11 +25,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
     const globalCompletion = totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0;
 
-    // Calculate Real Achievements
-    const perfectScores = submissions.filter(s => s.assignedGrade === 100).length;
-    const milestones = Math.floor(completedAssignments / 5); // 1 Achievement for every 5 assignments
-    const activeStudent = completedAssignments > 0 ? 1 : 0; // 1 Achievement for starting
-    const achievementsCount = activeStudent + milestones + perfectScores;
+    // Calculate Missing Tasks
+    const missingTasks = assignments.filter(a => {
+        const sub = submissions.find(s => s.courseWorkId === a.id);
+        const isTurnedIn = sub?.state === 'TURNED_IN' || sub?.state === 'RETURNED';
+        if (isTurnedIn) return false;
+        
+        let isPastDue = false;
+        if (a.dueDate) {
+            const hr = a.dueTime?.hours || 23;
+            const min = a.dueTime?.minutes || 59;
+            const dueDateObj = new Date(Date.UTC(a.dueDate.year, a.dueDate.month - 1, a.dueDate.day, hr, min));
+            isPastDue = dueDateObj.getTime() - new Date().getTime() < 0;
+        }
+        return isPastDue;
+    }).length;
 
     // Separate Active and Archived Courses
     const activeCourses = courses.filter(c => c.courseState === 'ACTIVE' || !c.courseState); // Default to active if undefined
@@ -44,35 +54,33 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             {/* Department Header */}
             <header className="bg-white border-b border-border py-3 px-4 md:px-6 xl:px-4 sticky top-0 z-50 shadow-sm bg-gradient-to-r from-white via-orange-50/30 to-white">
                 <div className="w-full max-w-6xl 2xl:max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-                <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
-                    <div className="flex items-center gap-3 border-r border-orange-200 pr-6 mr-2">
-                        <img src="/logos/kmutnb_logo.png" alt="Partner logo 1" className="h-12 w-auto hover:scale-105 transition-transform" />
-                        <img src="/logos/fte_logo.png" alt="Partner logo 2" className="h-12 w-auto hover:scale-105 transition-transform" />
-                        <img src="/logos/dce_logo.png" alt="Partner logo 3" className="h-14 w-auto drop-shadow-sm hover:scale-105 transition-transform" />
+                    {/* Branding */}
+                    <div className="flex items-center gap-3 w-full md:w-auto mb-4 md:mb-0">
+                        <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-10 w-auto hover:opacity-90 transition-opacity" />
+                        <div className="min-w-0 flex flex-col justify-center">
+                            <h1 className="text-xl font-black text-gray-800 tracking-tight leading-none">
+                                {t('brand.name')}
+                            </h1>
+                            <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">{language === 'th' ? 'พื้นที่ของนักเรียน' : 'Student Workspace'}</p>
+                        </div>
                     </div>
-                    <div className="hidden lg:flex flex-col justify-center">
-                        <h1 className="text-lg font-bold text-gray-800 leading-none">Classroom Companion</h1>
-                        <h2 className="text-sm font-semibold text-orange-600">{t('brand.tagline')}</h2>
-                        <p className="text-[10px] text-muted font-medium uppercase tracking-wide">{t('dashboard.studentWorkspace')}</p>
+                    {/* User Profile */}
+                    <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                        <LanguageToggle />
+                        <div className="h-8 w-px bg-gray-200 mx-1"></div>
+                        <button 
+                            onClick={onLogout}
+                            className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+                        >
+                            {t('dashboard.signOut')}
+                        </button>
+                        <div className="flex items-center gap-2 pl-2">
+                            <div className="hidden sm:block text-right">
+                                <p className="text-sm font-bold text-gray-800">{user.name}</p>
+                            </div>
+                            <img src={user.photoUrl} alt="Profile" className="w-9 h-9 rounded-full ring-2 ring-orange-100 shadow-sm object-cover" />
+                        </div>
                     </div>
-                    {/* Mobile/Tablet Compact View */}
-                    <div className="lg:hidden flex flex-col">
-                        <span className="text-lg font-bold text-gray-800">Companion</span>
-                        <span className="text-xs text-orange-600 font-medium">{language === 'th' ? 'มุมมองนักศึกษา' : 'Student View'}</span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-end">
-                    <LanguageToggle />
-                    <button
-                        onClick={onLogout}
-                        className="text-sm font-medium text-muted hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 transition-colors mr-2"
-                    >
-                        {t('dashboard.signOut')}
-                    </button>
-
-                    <img src={user.photoUrl} alt="Profile" className="w-8 h-8 rounded-full border border-border cursor-pointer hover:ring-2 hover:ring-gray-200" />
-                </div>
                 </div>
             </header>
 
@@ -80,21 +88,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full flex flex-col space-y-6">
                 
                 {/* Top Row: Metrics (Always on top) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <StatCard
-                                title={t('dashboard.completedAssignments')}
-                                value={completedAssignments}
-                                icon={Award}
+                                title={language === 'th' ? 'งานค้างส่ง' : 'Missing Tasks'}
+                                value={missingTasks}
+                                icon={AlertTriangle}
                             />
                             <StatCard
                                 title={t('dashboard.activeCourses')}
                                 value={activeCourses.length}
                                 icon={Folder}
-                            />
-                            <StatCard
-                                title={t('dashboard.achievements')}
-                                value={achievementsCount}
-                                icon={Award}
                             />
                         </div>
 
