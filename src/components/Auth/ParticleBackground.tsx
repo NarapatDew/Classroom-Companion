@@ -9,11 +9,12 @@ const ParticleBackground: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let animationFrameId: number;
         let particles: Particle[] = [];
+        let animationFrameId: number;
         let mouse = { x: -1000, y: -1000 };
 
         const resize = () => {
+            if (!canvas) return;
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             init();
@@ -27,33 +28,37 @@ const ParticleBackground: React.FC = () => {
             speedY: number;
 
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
+                this.x = Math.random() * (canvas?.width || window.innerWidth);
+                this.y = Math.random() * (canvas?.height || window.innerHeight);
                 this.size = Math.random() * 2 + 1;
                 this.speedX = Math.random() * 1 - 0.5;
                 this.speedY = Math.random() * 1 - 0.5;
             }
 
             update() {
+                const w = canvas?.width || window.innerWidth;
+                const h = canvas?.height || window.innerHeight;
+                
                 this.x += this.speedX;
                 this.y += this.speedY;
 
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
+                if (this.x > w) this.x = 0;
+                if (this.x < 0) this.x = w;
+                if (this.y > h) this.y = 0;
+                if (this.y < 0) this.y = h;
             }
 
             draw() {
                 if (!ctx) return;
-                ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // Emerald tint
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
                 ctx.fill();
             }
         }
 
         const init = () => {
+            if (!canvas) return;
             particles = [];
             const particleCount = (canvas.width * canvas.height) / 15000;
             for (let i = 0; i < particleCount; i++) {
@@ -62,8 +67,8 @@ const ParticleBackground: React.FC = () => {
         };
 
         const handleMouseMove = (e: MouseEvent) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+            mouse.x = e.x;
+            mouse.y = e.y;
         };
 
         const handleMouseLeave = () => {
@@ -72,35 +77,40 @@ const ParticleBackground: React.FC = () => {
         };
 
         const animate = () => {
+            if (!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
                 particles[i].draw();
 
-                // Connect to mouse
+                // Mouse interaction
                 const dxMouse = mouse.x - particles[i].x;
                 const dyMouse = mouse.y - particles[i].y;
-                const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-                if (distMouse < 150) {
+                const distanceMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+                
+                if (distanceMouse < 150) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(16, 185, 129, ${1 - distMouse / 150})`;
+                    ctx.strokeStyle = `rgba(16, 185, 129, ${(1 - distanceMouse / 150) * 0.5})`;
                     ctx.lineWidth = 1;
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.moveTo(mouse.x, mouse.y);
+                    ctx.lineTo(particles[i].x, particles[i].y);
                     ctx.stroke();
+                    
+                    particles[i].x -= dxMouse * 0.02;
+                    particles[i].y -= dyMouse * 0.02;
                 }
 
-                // Connect to other particles
+                // Particle connections
                 for (let j = i; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-
+                    
                     if (distance < 100) {
                         ctx.beginPath();
                         ctx.strokeStyle = `rgba(16, 185, 129, ${(1 - distance / 100) * 0.2})`;
-                        ctx.lineWidth = 1;
+                        ctx.lineWidth = 0.5;
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
                         ctx.stroke();
@@ -113,7 +123,7 @@ const ParticleBackground: React.FC = () => {
         window.addEventListener('resize', resize);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseleave', handleMouseLeave);
-
+        
         resize();
         animate();
 
@@ -128,7 +138,7 @@ const ParticleBackground: React.FC = () => {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"
+            className="absolute inset-0 z-0 pointer-events-none"
         />
     );
 };

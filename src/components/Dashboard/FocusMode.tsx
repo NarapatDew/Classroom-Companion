@@ -43,9 +43,9 @@ const FocusMode: React.FC<FocusModeProps> = ({ assignment, onClose }) => {
     }, [assignment, language]);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: number;
         if (isRunning && timeLeft > 0) {
-            interval = setInterval(() => {
+            interval = window.setInterval(() => {
                 setTimeLeft(prev => prev - 1);
             }, 1000);
         } else if (timeLeft === 0) {
@@ -59,7 +59,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ assignment, onClose }) => {
                 setIsRunning(false); // require manual start for next work session
             }
         }
-        return () => clearInterval(interval);
+        return () => window.clearInterval(interval);
     }, [isRunning, timeLeft, mode]);
 
     const toggleTimer = () => setIsRunning(!isRunning);

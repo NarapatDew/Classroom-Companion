@@ -51,10 +51,10 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
             missingTasks.sort((a, b) => a.dueDateObj.getTime() - b.dueDateObj.getTime());
             return {
                 type: 'critical',
-                title: language === 'th' ? 'มีงานค้างต้องรีบเคลียร์!' : 'Action Required: Missing Work!',
+                title: language === 'th' ? 'ก้าวแรกสำคัญที่สุดเสมอ 🌟' : 'You can do this! 🌟',
                 message: language === 'th' 
-                    ? `หยิบ "${missingTasks[0].title}" ขึ้นมาทำก่อนเลย งานนี้เลยกำหนดมาแล้ว!`
-                    : `Focus on "${missingTasks[0].title}" first. It's past due!`,
+                    ? `ลืมส่ง "${missingTasks[0].title}" ไปหรือเปล่า? ไม่เป็นไรครับ เริ่มเปิดงานขึ้นมาตอนนี้เลย ทุกความพยายามเล็กๆ มีความหมาย!`
+                    : `Looks like "${missingTasks[0].title}" slipped by. No worries! Jump into Focus Mode now and let's tackle it together.`,
                 actionLink: missingTasks[0].alternateLink,
                 targetAssignment: missingTasks[0],
                 icon: AlertCircle,
@@ -72,10 +72,10 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
             const target = upcomingTasks[0];
             return {
                 type: 'urgent',
-                title: language === 'th' ? 'เตรียมตัวสำหรับงานถัดไป' : 'Upcoming Deadline',
+                title: language === 'th' ? 'เตรียมพร้อมล่วงหน้า สบายใจกว่า 🎯' : 'Stay ahead of the game 🎯',
                 message: language === 'th'
-                    ? `อย่าลืมเคลียร์ "${target.title}" ที่กำลังจะมาถึงในอีก ${target.daysUntilDue === 0 ? 'วันนี้' : target.daysUntilDue + ' วัน'}`
-                    : `Keep an eye on "${target.title}" due in ${target.daysUntilDue === 0 ? 'today' : target.daysUntilDue + ' days'}.`,
+                    ? `มีกำหนดส่ง "${target.title}" ในอีก ${target.daysUntilDue === 0 ? 'วันนี้' : target.daysUntilDue + ' วัน'} จัดการให้เสร็จก่อนเวลาเพื่อความสบายใจไร้กังวลนะครับ`
+                    : `You have "${target.title}" coming up in ${target.daysUntilDue === 0 ? 'today' : target.daysUntilDue + ' days'}. Knock it out early and enjoy your free time!`,
                 actionLink: target.alternateLink,
                 targetAssignment: target,
                 icon: Clock,
