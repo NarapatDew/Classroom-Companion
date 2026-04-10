@@ -3,7 +3,7 @@ import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
-import CourseTrendDashboard from './CourseTrendDashboard';
+
 import { Folder, Award, ExternalLink, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
@@ -131,24 +131,30 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                             <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0 text-transparent" aria-hidden="true" tabIndex={-1}>&nbsp;</a>
                                             
                                             {/* Banner */}
-                                            <div className="min-h-[6.5rem] h-auto bg-gradient-to-r from-blue-600 to-indigo-600 p-4 pb-10 relative overflow-hidden">
-                                                {/* Decorative background glow on hover */}
-                                                <div className="absolute -right-4 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 group-hover:scale-150 transition-all duration-700 pointer-events-none z-0"></div>
+                                            <div 
+                                                className="min-h-[6.5rem] h-auto p-4 pb-10 relative overflow-hidden bg-cover bg-center"
+                                                style={{
+                                                    backgroundImage: ((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl)
+                                                        ? `url(${((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl)})`
+                                                        : undefined,
+                                                    background: !((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl) 
+                                                        ? ((course as any).courseGroupTheme?.themeColor || `linear-gradient(135deg, hsl(${(course.name.charCodeAt(0)*137)%360}, 70%, 60%), hsl(${(course.name.charCodeAt(0)*137)%360}, 80%, 40%))`)
+                                                        : undefined
+                                                }}
+                                            >
+                                                {/* Dark overlay for readability if image exists */}
+                                                {((course as any).courseGroupTheme?.info?.headerImageUrl || (course as any).headerImageUrl) && (
+                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
+                                                )}
                                                 
                                                 <div className="flex justify-between items-start relative z-10">
-                                                    <h3 className="text-white font-medium text-xl w-[85%] pointer-events-none text-balance line-clamp-2 leading-snug" title={course.name}>
+                                                    <h3 className="text-white font-medium text-xl w-[85%] pointer-events-none text-balance line-clamp-2 leading-snug drop-shadow-md" title={course.name}>
                                                         <a href={course.alternateLink} target="_blank" rel="noopener noreferrer" className="pointer-events-auto hover:underline">
                                                             {course.name}
                                                         </a>
                                                     </h3>
                                                 </div>
-                                                <p className="text-white/90 text-sm mt-1 line-clamp-2" title={course.section}>{course.section}</p>
-
-                                                <div className="absolute -bottom-8 right-4 w-16 h-16 bg-white rounded-full p-1 shadow-sm">
-                                                    <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center text-primary font-bold text-xl">
-                                                        {course.name.charAt(0)}
-                                                    </div>
-                                                </div>
+                                                <p className="text-white/95 font-medium text-sm mt-1 line-clamp-2 relative z-10 drop-shadow-md" title={course.section}>{course.section}</p>
                                             </div>
 
                                             {/* Body */}
@@ -190,12 +196,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                         </div>
                                     </div>
 
-                            {/* Course Trend Analytics */}
-                            {activeCourses.length > 0 && submissions.length > 0 && (
-                                <div className="mb-10">
-                                    <CourseTrendDashboard courses={activeCourses} assignments={assignments} submissions={submissions} />
-                                </div>
-                            )}
+
 
                             {/* Archived Courses */}
                             {archivedCourses.length > 0 && (
@@ -234,12 +235,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                                         <h3 className="text-white font-medium text-lg text-balance line-clamp-2 w-[85%] relative z-10 pointer-events-none leading-snug" title={course.name}>
                                                             {course.name}
                                                         </h3>
-
-                                                        <div className="absolute -bottom-6 right-4 w-12 h-12 bg-white rounded-full p-1 shadow-sm z-10">
-                                                            <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
-                                                                {course.name.charAt(0)}
-                                                            </div>
-                                                        </div>
                                                     </div>
 
                                                     {/* Body */}

@@ -32,8 +32,6 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
             let isPastDue = false;
 
             if (assignment.dueDate) {
-                // Google api dueDate has year, month, day. Wait, months are 1-12 in GC api? Yes.
-                // It also has dueTime (hours, minutes)
                 const hr = assignment.dueTime?.hours || 23;
                 const min = assignment.dueTime?.minutes || 59;
 
@@ -46,8 +44,12 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                 ));
 
                 const timeDiff = dueDateObj.getTime() - now.getTime();
-                daysUntilDue = Math.ceil(timeDiff / (1000 * 3600 * 24));
                 isPastDue = timeDiff < 0;
+
+                // Better daysUntilDue logic using midnight comparisons (calendar days instead of math on raw time diffs)
+                const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                const dueMidnight = new Date(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate()).getTime();
+                daysUntilDue = Math.round((dueMidnight - todayMidnight) / (1000 * 3600 * 24));
             }
 
             return {
@@ -67,11 +69,11 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
         let filtered = enhancedAssignments;
 
         if (filter === 'TODAY') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue <= 1 && a.daysUntilDue >= 0);
+            filtered = enhancedAssignments.filter(a => a.daysUntilDue === 0);
         } else if (filter === '3DAYS') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue <= 3 && a.daysUntilDue >= 0);
+            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 3);
         } else if (filter === '7DAYS') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue <= 7 && a.daysUntilDue >= 0);
+            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 7);
         }
 
         // Include past due by default in all views unless it gets too much? 
@@ -122,7 +124,24 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
 
     const formatDueDate = (date: Date | null) => {
         if (!date) return language === 'th' ? 'ไม่มีกำหนดส่ง' : 'No due date';
-        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dueDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dayDiff = Math.round((dueDay.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        
+        const locale = language === 'th' ? 'th-TH' : 'en-US';
+        const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        
+        if (dayDiff === 0) {
+            return language === 'th' ? `วันนี้ ${timeStr}` : `Today, ${timeStr}`;
+        } else if (dayDiff === 1) {
+            return language === 'th' ? `พรุ่งนี้ ${timeStr}` : `Tomorrow, ${timeStr}`;
+        } else if (dayDiff === -1) {
+            return language === 'th' ? `เมื่อวาน ${timeStr}` : `Yesterday, ${timeStr}`;
+        }
+        
+        return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) + ', ' + timeStr;
     };
 
     const colorClasses = [
@@ -143,21 +162,23 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                     <h3 className="font-bold text-gray-800 tracking-tight">{t('todo.title')}</h3>
                 </div>
                 {/* Filters */}
-                <div className="flex flex-wrap sm:flex-nowrap bg-gray-100 p-1 rounded-lg w-full sm:w-auto gap-1">
-                    {[
-                        { key: 'ALL', label: t('todo.filterAll') },
-                        { key: 'TODAY', label: t('todo.filterToday') },
-                        { key: '3DAYS', label: t('todo.filter3Days') },
-                        { key: '7DAYS', label: t('todo.filter7Days') },
-                    ].map(f => (
-                        <button
-                            key={f.key}
-                            onClick={() => setFilter(f.key as FilterType)}
-                            className={`flex-1 sm:flex-none px-2 py-1.5 text-[11px] sm:text-xs font-semibold rounded-md transition-all whitespace-nowrap ${filter === f.key ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
+                <div className="w-full mt-3 sm:mt-0 bg-gray-100/80 p-1 rounded-xl shadow-inner border border-gray-200/60">
+                    <div className="flex w-full gap-1">
+                        {[
+                            { key: 'ALL', label: t('todo.filterAll') },
+                            { key: 'TODAY', label: t('todo.filterToday') },
+                            { key: '3DAYS', label: t('todo.filter3Days') },
+                            { key: '7DAYS', label: t('todo.filter7Days') },
+                        ].map(f => (
+                            <button
+                                key={f.key}
+                                onClick={() => setFilter(f.key as FilterType)}
+                                className={`flex-1 px-1 sm:px-1.5 py-1 xl:py-1.5 text-[10px] xl:text-[11px] font-bold rounded-lg transition-all text-center select-none flex items-center justify-center min-h-[32px] ${filter === f.key ? 'bg-white text-blue-600 shadow-[0_1px_4px_rgba(0,0,0,0.1)] ring-1 ring-black/[0.04]' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/60'}`}
+                            >
+                                <span className="whitespace-normal leading-tight break-words">{f.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -167,29 +188,30 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                         {filteredAssignments.map((a) => (
                             <a
                                 key={a.id}
-                                href={a.alternateLink}
-                                target="_blank"
+                                href={a.alternateLink || '#'}
+                                target={a.alternateLink ? "_blank" : undefined}
                                 rel="noopener noreferrer"
-                                className="block bg-white border border-gray-100 p-3 rounded-lg shadow-sm hover:shadow-md hover:border-orange-200 transition-all group"
+                                className="flex flex-col bg-white border border-gray-100 p-3.5 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 group relative"
                             >
-                                <div className="flex justify-between items-start">
-                                    <div className="min-w-0 pr-3 flex-1">
-                                        <h4 className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-primary transition-colors pr-2" title={a.title}>
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="text-[14px] leading-tight font-bold text-gray-800 group-hover:text-primary transition-colors pr-2 break-words" title={a.title}>
                                             {a.title}
                                         </h4>
-                                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${colorClasses[a.courseColor]} truncate max-w-[120px] sm:max-w-[150px]`} title={a.courseName}>
+                                        <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                                            <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md ${colorClasses[a.courseColor]} truncate max-w-[140px] sm:max-w-full`} title={a.courseName}>
                                                 {a.courseName}
                                             </span>
                                             {getStatusBadge(a)}
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end shrink-0">
-                                        <span className={`text-xs font-semibold ${a.isPastDue ? 'text-red-500' : 'text-gray-500'}`}>
+                                    <div className="flex flex-col items-end shrink-0 text-right">
+                                        <span className={`text-[11px] sm:text-xs font-semibold px-2 py-1 rounded-md border ${a.isPastDue ? 'text-red-600 border-red-100 bg-red-50' : 'text-gray-600 border-gray-100 bg-gray-50/80'} shadow-sm whitespace-nowrap`}>
                                             {formatDueDate(a.dueDateObj)}
                                         </span>
-                                        <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                                            {t('todo.open')} <ExternalLink size={10} />
+                                        
+                                        <div className="mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white bg-blue-600 px-2 py-1 rounded-md shadow-md">
+                                            {t('todo.open')} <ExternalLink size={12} />
                                         </div>
                                     </div>
                                 </div>
