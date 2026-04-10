@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import type { UserProfile } from '../../types';
 import { fetchUserProfile } from '../../services/googleClassroom';
@@ -17,26 +17,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     const [teacherProfile, setTeacherProfile] = useState<UserProfile | null>(null);
     const [teacherToken, setTeacherToken] = useState<string | null>(null);
     const { language, t } = useLanguage();
-    
-    // Tilt Effect Logic
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
-        const { clientX, clientY } = e;
-        const { innerWidth, innerHeight } = window;
-        
-        // Tilt bounds: +/- 5 degrees
-        const tiltX = ((clientY / innerHeight) - 0.5) * -10; 
-        const tiltY = ((clientX / innerWidth) - 0.5) * 10;
-        
-        cardRef.current.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`;
-    };
-
-    const handleMouseLeave = () => {
-        if (!cardRef.current) return;
-        cardRef.current.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-    };
 
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -74,20 +54,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     }
 
     return (
-        <div 
-            className="min-h-screen flex items-center justify-center p-3 sm:p-4 lg:p-6 relative overflow-hidden bg-gradient-to-br from-[#e6fcf5] via-[#f0fdf4] to-[#ecfdf5]"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-        >
+        <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 lg:p-6 relative overflow-hidden bg-gradient-to-br from-[#e6fcf5] via-[#f0fdf4] to-[#ecfdf5]">
             {/* Ambient Background Blobs */}
             <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
             <div className="absolute top-10 right-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>
             <div className="absolute -bottom-8 left-20 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-4000"></div>
 
-            <div 
-                ref={cardRef}
-                className="w-full max-w-5xl bg-white/85 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col md:flex-row relative z-10 border border-white/50 transition-transform duration-300 ease-out will-change-transform"
-            >
+            <div className="w-full max-w-5xl bg-white/85 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col md:flex-row relative z-10 border border-white/50">
 
                 {/* Left Side: Branding & Logos */}
                 <div className="md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-600 to-green-700 text-white flex flex-col justify-between relative overflow-hidden min-h-[280px] md:min-h-[620px]">
@@ -134,31 +107,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         <p className="text-gray-500 mt-2 text-sm">{t('login.subtitle')}</p>
                     </div>
 
-                    <div className="space-y-4 sm:space-y-5">
+                    <div className="space-y-4 sm:space-y-5 relative">
                         {/* Student Mode Card */}
-                        <section className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 sm:p-5 hover:bg-emerald-50 transition-colors">
+                        <section className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_10px_40px_-10px_rgba(16,185,129,0.3)] hover:bg-white hover:border-emerald-300 relative z-0 hover:z-10 group">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
-                                    <h3 className="text-base sm:text-lg font-bold text-emerald-900">{t('login.studentMode')}</h3>
+                                    <h3 className="text-base sm:text-lg font-bold text-emerald-900 group-hover:text-emerald-700 transition-colors">{t('login.studentMode')}</h3>
                                     <p className="text-xs sm:text-sm text-emerald-700 mt-0.5">{t('login.studentWho')}</p>
                                 </div>
-                                <span className="text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full bg-white text-emerald-700 border border-emerald-200 shadow-sm">
+                                <span className="text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full bg-white text-emerald-700 border border-emerald-200 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                                     {language === 'th' ? 'แนะนำ' : 'Recommended'}
                                 </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-3 mb-4 leading-relaxed">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-3 mb-4 leading-relaxed group-hover:text-gray-800 transition-colors">
                                 {t('login.studentDesc')}
                             </p>
                             <button
                                 onClick={() => login()}
                                 disabled={loading}
-                                className="w-full min-h-11 flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-md transition-all px-4 sm:px-6 py-3 rounded-xl group relative overflow-hidden"
+                                className="w-full min-h-11 flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 group-hover:bg-emerald-600 group-hover:border-emerald-600 group-hover:text-white group-hover:shadow-md transition-all px-4 sm:px-6 py-3 rounded-xl overflow-hidden"
                             >
                                 {loading ? (
                                     <div className="w-5 h-5 border-2 border-gray-300 border-t-emerald-600 rounded-full animate-spin"></div>
                                 ) : (
                                     <>
-                                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+                                        <div className="bg-white p-1 rounded-full group-hover:scale-110 transition-transform">
+                                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5 block" />
+                                        </div>
                                         <span className="font-semibold text-sm sm:text-base">{t('login.googleSignIn')}</span>
                                     </>
                                 )}
@@ -166,18 +141,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         </section>
 
                         {/* Instructor Mode Card */}
-                        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 hover:bg-slate-50 transition-colors">
-                            <h3 className="text-base sm:text-lg font-bold text-slate-900">{t('login.instructor')}</h3>
+                        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] hover:border-slate-400 relative z-0 hover:z-10 group">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-slate-700 transition-colors">{t('login.instructor')}</h3>
                             <p className="text-xs sm:text-sm text-slate-600 mt-0.5">{t('login.instructorWho')}</p>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-3 mb-4 leading-relaxed">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-3 mb-4 leading-relaxed group-hover:text-gray-800 transition-colors">
                                 {t('login.instructorDesc')}
                             </p>
                             <button
                                 onClick={handleTeacherLogin}
-                                className="w-full min-h-11 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-800 to-green-900 text-white hover:from-emerald-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all px-4 sm:px-6 py-3 rounded-xl font-medium text-sm hover:-translate-y-0.5 active:translate-y-0"
+                                className="w-full min-h-11 flex items-center justify-center gap-2 bg-slate-100 border border-slate-200 text-slate-700 group-hover:bg-gradient-to-r group-hover:from-emerald-700 group-hover:to-green-800 group-hover:text-white group-hover:border-transparent group-hover:shadow-lg transition-all px-4 sm:px-6 py-3 rounded-xl font-medium text-sm"
                             >
                                 <span>{t('login.openInstructor')}</span>
-                                <span className="bg-emerald-600/30 text-[10px] px-1.5 py-0.5 rounded text-emerald-100 border border-emerald-500/30">{t('login.teacherMode')}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded transition-colors bg-slate-200 text-slate-700 border border-slate-300 group-hover:bg-emerald-600/30 group-hover:text-emerald-100 group-hover:border-emerald-500/30">{t('login.teacherMode')}</span>
                             </button>
                         </section>
                     </div>
