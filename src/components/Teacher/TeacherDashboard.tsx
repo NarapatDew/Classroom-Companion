@@ -8,7 +8,8 @@ import {
     Clock,
     LogOut,
     ChevronDown,
-    Check
+    Check,
+    Download
 } from 'lucide-react';
 import {
     BarChart,
@@ -47,14 +48,14 @@ interface Assignment {
     title: string;
     dueDate: string;
     totalPoints: number;
-    averageScore: number;
+    completionRate: number;
 }
 
 interface Student {
     id: string;
     name: string;
     avatarUrl: string;
-    overallGrade: number;
+    completedAssignmentsCount: number;
     missingAssignmentsCount: number;
 }
 
@@ -160,7 +161,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                 title: w.title,
                 dueDate: w.dueDate ? `${w.dueDate.year}-${w.dueDate.month}-${w.dueDate.day}` : 'No Due Date',
                 totalPoints: w.maxPoints || 100,
-                averageScore: 0
+                completionRate: 0
             }));
 
             // Transform Submissions
@@ -180,25 +181,18 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
             });
 
             // --- Calculate Derived Stats for Real Data ---
+            const totalStudentsCount = realStudents.length;
+
             realAssignments.forEach(a => {
-                const aSubs = realSubmissions.filter(s => s.assignmentId === a.id && s.score !== undefined);
-                if (aSubs.length > 0) {
-                    const total = aSubs.reduce((sum, s) => sum + (s.score || 0), 0);
-                    a.averageScore = Math.round(total / aSubs.length);
-                }
+                const aSubs = realSubmissions.filter(s => s.assignmentId === a.id);
+                const turnedInCount = aSubs.filter(s => s.status === 'TURNED_IN').length;
+                a.completionRate = totalStudentsCount > 0 ? Math.round((turnedInCount / totalStudentsCount) * 100) : 0;
             });
 
             realStudents.forEach(s => {
                 const sSubs = realSubmissions.filter(sub => sub.studentId === s.id);
                 s.missingAssignmentsCount = sSubs.filter(sub => sub.status === 'MISSING').length;
-
-                const gradedSubs = sSubs.filter(sub => sub.score !== undefined);
-                if (gradedSubs.length > 0) {
-                    const totalScore = gradedSubs.reduce((sum, sub) => sum + (sub.score || 0), 0);
-                    s.overallGrade = Math.round(totalScore / gradedSubs.length);
-                } else {
-                    s.overallGrade = 0;
-                }
+                s.completedAssignmentsCount = sSubs.filter(sub => sub.status === 'TURNED_IN').length;
             });
 
             setStudents(realStudents);
@@ -221,11 +215,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
     // --- Analytics Calculations ---
     const stats = useMemo(() => {
         const totalStudents = students.length;
-        if (totalStudents === 0) return { totalStudents: 0, classAverage: 0, atRiskCount: 0 };
+        if (totalStudents === 0) return { totalStudents: 0, atRiskCount: 0 };
 
-        const classAverage = Math.round(students.reduce((acc, s) => acc + s.overallGrade, 0) / totalStudents);
-        const atRiskCount = students.filter(s => s.overallGrade < 50 || s.missingAssignmentsCount > 2).length;
-        return { totalStudents, classAverage, atRiskCount };
+        const atRiskCount = students.filter(s => s.missingAssignmentsCount >= 2).length;
+        return { totalStudents, atRiskCount };
     }, [students]);
 
     const selectedAssignment = assignments.find(a => a.id === selectedAssignmentId);
@@ -269,6 +262,35 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
         if (accessToken) {
             loadCourseData(accessToken, courseId);
         }
+    };
+
+    const handleExportCSV = () => {
+        if (!activeCourse) return;
+        
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        
+        const headers = ['Student Name', 'Missing Tasks', ...assignments.map(a => a.title.replace(/,/g, ' '))];
+        csvContent += headers.join(",") + "\n";
+        
+        students.forEach(student => {
+            const row = [
+                `"${student.name}"`, 
+                student.missingAssignmentsCount,
+                ...assignments.map(a => {
+                    const sub = submissions.find(s => s.studentId === student.id && s.assignmentId === a.id);
+                    return sub ? `"${sub.status}"` : '"ASSIGNED"';
+                })
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `ClassroomTracker_${activeCourse.name}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -533,8 +555,8 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                         {/* Performance Chart */}
                         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="font-semibold text-gray-700">{language === 'th' ? 'ผลการทำงานย้อนหลัง' : 'Assignment Performance History'}</h3>
-                                <div className="text-xs text-gray-500">{language === 'th' ? 'คะแนนเฉลี่ย' : 'Avg Score'}</div>
+                                <h3 className="font-semibold text-gray-700">{language === 'th' ? 'ภาพรวมการส่งงานแต่ละชิ้น' : 'Assignment Completion Rates'}</h3>
+                                <div className="text-xs text-gray-500">{language === 'th' ? 'อัตราส่งงาน' : '% Turned In'}</div>
                             </div>
                             <div className="h-64">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -545,14 +567,20 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                             tick={{ fontSize: 10 }}
                                             tickFormatter={(val) => val.length > 15 ? `${val.substring(0, 15)}...` : val}
                                         />
-                                        <YAxis />
+                                        <YAxis domain={[0, 100]} tickFormatter={(val) => `${val}%`} />
                                         <Tooltip
                                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                            formatter={(value) => [`${value}%`, language === 'th' ? 'ส่งแล้ว' : 'Turned In']}
                                         />
-                                        <Bar dataKey="averageScore" radius={[4, 4, 0, 0]}>
-                                            {assignments.map((entry) => (
-                                                <Cell key={`cell-${entry.id}`} fill={entry.averageScore < 60 ? '#ef4444' : '#3b82f6'} />
-                                            ))}
+                                        <Bar dataKey="completionRate" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                                            {assignments.map((entry) => {
+                                                // Cohesive color mapping based on completion rate
+                                                let barColor = '#10b981'; // Emerald 500 for good (>= 75)
+                                                if (entry.completionRate < 50) barColor = '#fb7185'; // Soft Rose 400 for Needs Attention
+                                                else if (entry.completionRate < 75) barColor = '#fcd34d'; // Soft Amber 300 for Average
+
+                                                return <Cell key={`cell-${entry.id}`} fill={barColor} className="transition-all duration-300 hover:opacity-80" />;
+                                            })}
                                         </Bar>
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -561,16 +589,24 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
 
                         {/* Student Roster Table */}
                         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                            <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                                <h3 className="font-semibold text-gray-700">{language === 'th' ? 'รายชื่อนักเรียน' : 'Student Roster'}</h3>
-                                <div className="text-xs text-gray-500">{students.length} {language === 'th' ? 'คน' : 'Students'}</div>
+                            <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center flex-wrap gap-3">
+                                <div className="flex items-center gap-3">
+                                    <h3 className="font-semibold text-gray-700">{language === 'th' ? 'รายชื่อนักเรียนและการส่งงาน' : 'Student Roster & Tracking'}</h3>
+                                    <div className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{students.length} {language === 'th' ? 'คน' : 'Students'}</div>
+                                </div>
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="text-xs flex items-center justify-center gap-1.5 font-bold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:shadow-sm px-3 py-1.5 rounded-md transition-all active:scale-95"
+                                >
+                                    <Download size={14} /> {language === 'th' ? 'ส่งออกบัญชีรายชื่อ (CSV)' : 'Export Roster (CSV)'}
+                                </button>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
                                         <tr>
                                             <th className="px-6 py-3">{language === 'th' ? 'ชื่อนักเรียน' : 'Student Name'}</th>
-                                            <th className="px-6 py-3">{language === 'th' ? 'คะแนนรวม' : 'Overall Grade'}</th>
+                                            <th className="px-6 py-3 min-w-[150px]">{language === 'th' ? 'ความคืบหน้าการส่งงาน' : 'Completion Progress'}</th>
                                             <th className="px-6 py-3 text-center">{language === 'th' ? 'งานค้างส่ง' : 'Missing Work'}</th>
                                             <th className="px-6 py-3 text-center">{language === 'th' ? 'สถานะ' : 'Status'}</th>
                                         </tr>
@@ -578,22 +614,25 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                     <tbody className="divide-y divide-gray-100">
                                         {students.length > 0 ? (
                                             students.map((student) => {
-                                                const isAtRisk = student.overallGrade < 50 || student.missingAssignmentsCount >= 3;
+                                                const isAtRisk = student.missingAssignmentsCount >= 3;
+                                                const completionPercentage = assignments.length > 0 ? Math.round((student.completedAssignmentsCount / assignments.length) * 100) : 0;
                                                 return (
                                                     <tr key={student.id} className={`hover:bg-gray-50 transition-colors ${isAtRisk ? 'bg-red-50/30' : ''}`}>
                                                         <td className="px-6 py-4 flex items-center gap-3">
-                                                            <StudentAvatar url={student.avatarUrl} name={student.name} className="w-8 h-8 rounded-full bg-gray-200" />
-                                                            <span className="font-medium text-gray-700">{student.name}</span>
+                                                            <StudentAvatar url={student.avatarUrl} name={student.name} className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
+                                                            <span className="font-medium text-gray-700 truncate min-w-0 max-w-[120px]">{student.name}</span>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                                <div className="w-full max-w-[100px] h-2.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
                                                                     <div
-                                                                        className={`h-full rounded-full ${student.overallGrade >= 80 ? 'bg-green-500' : student.overallGrade >= 50 ? 'bg-blue-500' : 'bg-red-500'}`}
-                                                                        style={{ width: `${student.overallGrade}%` }}
+                                                                        className={`h-full rounded-full transition-all duration-500 ${completionPercentage === 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                                                                        style={{ width: `${completionPercentage}%` }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-xs font-semibold">{student.overallGrade}%</span>
+                                                                <span className="text-xs font-semibold whitespace-nowrap text-gray-600 block w-8">
+                                                                    {student.completedAssignmentsCount}/{assignments.length}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4 text-center">
