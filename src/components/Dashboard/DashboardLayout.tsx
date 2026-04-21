@@ -60,14 +60,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                     <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end bg-slate-50 md:bg-transparent p-2 md:p-0 rounded-2xl border border-slate-100 md:border-0">
                         <div className="flex items-center gap-3">
                             <LanguageToggle />
-                            <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
-                            <button 
-                                onClick={onLogout}
-                                className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-slate-100"
-                                title={t('dashboard.signOut')}
-                            >
-                                <LogOut size={16} />
-                            </button>
                         </div>
                         <div className="flex items-center gap-3 pl-3 md:pl-5 border-l border-slate-200 md:border-0">
                             <div className="hidden sm:block text-right">
@@ -78,6 +70,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                 <img src={user.photoUrl} alt="Profile" className="w-10 h-10 rounded-2xl ring-4 ring-orange-50 shadow-md object-cover transition-transform group-hover:scale-105" />
                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></div>
                             </div>
+                            <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
+                            <button 
+                                onClick={onLogout}
+                                className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-slate-100"
+                                title={language === 'th' ? 'ออกจากระบบ' : 'Sign Out'}
+                            >
+                                <LogOut size={16} />
+                            </button>
                         </div>
                     </div>
                 </div>
