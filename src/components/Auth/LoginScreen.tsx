@@ -216,19 +216,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 <button
                                     onClick={() => login()}
                                     disabled={loading}
-                                    className="w-full h-12 flex items-center gap-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all font-bold text-xs shadow-xl shadow-emerald-200 active:scale-95 px-3"
+                                    className="w-full h-12 flex items-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all font-bold text-xs shadow-sm hover:shadow-xl hover:shadow-emerald-200 active:scale-95 px-3 group/btn"
                                 >
                                     {loading ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                                        <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
                                     ) : (
                                         <>
-                                            <div className="shrink-0 bg-white p-1.5 rounded-xl shadow-sm">
+                                            <div className="shrink-0 bg-white p-1.5 rounded-xl shadow-sm ring-1 ring-slate-100 group-hover/btn:ring-white/20 transition-all">
                                                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-3.5 h-3.5" />
                                             </div>
                                             <span className="flex-1 text-center whitespace-nowrap">
                                                 {t('login.googleSignIn')}
                                             </span>
-                                            <ArrowRight size={16} className="shrink-0 opacity-60 group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={16} className="shrink-0 opacity-40 group-hover/btn:opacity-100 group-hover/btn:translate-x-1 transition-all" />
                                         </>
                                     )}
                                 </button>
