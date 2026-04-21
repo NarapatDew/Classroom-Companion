@@ -201,10 +201,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                 <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></div>
                             </div>
                             <div className="hidden lg:block min-w-0">
-                                <h1 className="text-lg font-black text-slate-900 tracking-tighter leading-none">
+                                <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">
                                     {t('brand.name')}
                                 </h1>
-                                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1 antialiased">Instructor Portal</p>
+                                <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-1 antialiased">Instructor Portal</p>
                             </div>
                         </div>
 
@@ -220,10 +220,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                     <BookOpen size={14} />
                                 </div>
                                 <div className="flex flex-col text-left max-w-[180px] lg:max-w-[240px]">
-                                    <span className="text-[11px] font-black text-slate-800 truncate">
+                                    <span className="text-xs font-bold text-slate-800 truncate">
                                         {activeCourse ? activeCourse.name : 'Select Course'}
                                     </span>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
                                         {activeCourse?.section ? `Sec ${activeCourse.section}` : 'Manage Classroom'}
                                     </span>
                                 </div>
@@ -237,6 +237,9 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                     <div className="absolute top-[calc(100%+12px)] left-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200">
                                         
                                         {/* Search Input inside Dropdown */}
+                                        <div className="px-5 py-2 border-b border-slate-50 mb-2">
+                                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Quick Switch</h3>
+                                        </div>
                                         <div className="px-3 pb-3 mb-2 border-b border-slate-50">
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
@@ -272,12 +275,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                                     </button>
                                                 ))
                                             ) : (
-                                                <div className="py-8 text-center">
-                                                    <div className="text-slate-300 mb-2 flex justify-center"><Filter size={24} /></div>
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-                                                        {language === 'th' ? 'ไม่พบรายวิชา' : 'No courses found'}
-                                                    </p>
-                                                </div>
+                                                    <div className="py-8 text-center">
+                                                        <div className="text-slate-300 mb-2 flex justify-center"><Filter size={24} /></div>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                                            {language === 'th' ? 'ไม่พบรายวิชา' : 'No courses found'}
+                                                        </p>
+                                                    </div>
                                             )}
                                         </div>
                                     </div>
@@ -292,8 +295,8 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                         <div className="h-8 w-px bg-slate-100 hidden md:block"></div>
                         <div className="flex items-center gap-4">
                             <div className="hidden lg:block text-right">
-                                <p className="text-[11px] font-black text-slate-800 leading-none mb-1">{user?.name}</p>
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Instructor</p>
+                                <p className="text-xs font-bold text-slate-800 leading-none mb-1">{user?.name}</p>
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest leading-none">Instructor</p>
                             </div>
                             <div className="relative">
                                 <img src={user?.photoUrl || `https://ui-avatars.com/api/?name=T&background=10b981&color=fff`} alt="Profile" className="w-9 h-9 rounded-2xl ring-4 ring-emerald-50 shadow-md object-cover" />
@@ -316,11 +319,16 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                 <Users size={20} />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{language === 'th' ? 'นักเรียนทั้งหมด' : 'Total Students'}</p>
-                                <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{stats.totalStudents}</h3>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{language === 'th' ? 'นักเรียนทั้งหมด' : 'Total Students'}</p>
+                                <div className="flex items-baseline gap-3">
+                                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{stats.totalStudents}</h3>
+                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        {language === 'th' ? 'กำลังใช้งาน' : 'Synced'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <div className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-emerald-100">Synced</div>
                     </div>
 
                     <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-lg transition-all duration-300">
@@ -329,11 +337,17 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                 <Target size={20} />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{language === 'th' ? 'ต้องติดตาม' : 'Priority'}</p>
-                                <h3 className={`text-2xl font-black tracking-tighter ${stats.atRiskCount > 0 ? 'text-rose-600' : 'text-slate-900'}`}>{stats.atRiskCount}</h3>
+                                <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${stats.atRiskCount > 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                                    {language === 'th' ? 'สถานะการส่งงาน' : 'Attention Monitor'}
+                                </p>
+                                <div className="flex items-baseline gap-3">
+                                    <h3 className={`text-2xl font-bold tracking-tight ${stats.atRiskCount > 0 ? 'text-rose-700' : 'text-slate-900'}`}>{stats.atRiskCount}</h3>
+                                    <span className={`px-3 py-1 text-xs font-bold rounded-full border uppercase tracking-widest whitespace-nowrap shadow-sm ${stats.atRiskCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                        {language === 'th' ? 'นักเรียนที่ต้องดูแล' : 'Requires Focus'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        {stats.atRiskCount > 0 && <div className="px-2 py-1 bg-rose-50 text-rose-600 text-[9px] font-black rounded-lg uppercase tracking-widest border border-rose-100 animate-pulse">Attention</div>}
                     </div>
 
                     {/* Placeholder metrics to balance the row if needed, or leave at 2 columns */}
@@ -351,13 +365,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                         <LayoutDashboard size={20} />
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-slate-800 text-lg tracking-tighter leading-none">
+                                        <h3 className="font-bold text-slate-800 text-lg tracking-tight leading-none">
                                             {language === 'th' ? 'รายชื่อนักเรียน' : 'Student Performance Grid'}
                                         </h3>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Interactive classroom tracking active</p>
+                                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1.5">Interactive classroom tracking active</p>
                                     </div>
                                 </div>
-                                <div className="hidden sm:block px-4 py-2 bg-slate-100 border border-slate-200/50 rounded-xl text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <div className="hidden sm:block px-4 py-2 bg-slate-100 border border-slate-200/50 rounded-xl text-xs font-bold text-slate-500 uppercase tracking-widest">
                                     {students.length} Total Users
                                 </div>
                             </div>
@@ -366,10 +380,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/20">
-                                            <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50">{language === 'th' ? 'ชื่อนักเรียน' : 'Student Profile'}</th>
-                                            <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50">{language === 'th' ? 'ความก้าวหน้า' : 'Work Progress'}</th>
-                                            <th className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50">{language === 'th' ? 'ค้างส่ง' : 'Missing'}</th>
-                                            <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50">{language === 'th' ? 'สถานะล่าสุด' : 'Current Status'}</th>
+                                    <th className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">{language === 'th' ? 'ชื่อนักเรียน' : 'Student Profile'}</th>
+                                    <th className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">{language === 'th' ? 'ความก้าวหน้า' : 'Work Progress'}</th>
+                                    <th className="px-8 py-5 text-center text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">{language === 'th' ? 'ค้างส่ง' : 'Missing'}</th>
+                                    <th className="px-8 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">{language === 'th' ? 'สถานะล่าสุด' : 'Current Status'}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50/50">
@@ -382,7 +396,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                                     <td className="px-8 py-5">
                                                         <div className="flex items-center gap-4">
                                                             <StudentAvatar url={student.avatarUrl} name={student.name} className="w-10 h-10 rounded-2xl shadow-sm border border-slate-100 object-cover group-hover:scale-110 transition-all duration-300 shrink-0" />
-                                                            <span className="font-extrabold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors truncate">{student.name}</span>
+                                                            <span className="font-bold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors truncate">{student.name}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-5">
@@ -393,14 +407,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                                                     style={{ width: `${completionPercentage}%` }}
                                                                 />
                                                             </div>
-                                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider bg-slate-100/50 px-2.5 py-1 rounded-xl border border-slate-100 leading-none shrink-0">
+                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100/50 px-2.5 py-1 rounded-xl border border-slate-100 leading-none shrink-0">
                                                                 {student.completedAssignmentsCount}/{assignments.length}
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-5 text-center">
                                                         {student.missingAssignmentsCount > 0 ? (
-                                                            <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2.5 rounded-xl bg-rose-50 text-rose-600 font-black text-xs shadow-sm border border-rose-100 animate-pulse">
+                                                            <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs shadow-sm border border-rose-100 animate-pulse">
                                                                 {student.missingAssignmentsCount}
                                                             </span>
                                                         ) : (
@@ -409,12 +423,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                                                     </td>
                                                     <td className="px-8 py-5 text-right">
                                                         {isAtRisk ? (
-                                                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-orange-50 text-orange-700 text-[10px] font-black border border-orange-100 uppercase tracking-[0.1em] shadow-sm">
+                                                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-orange-50 text-orange-700 text-xs font-bold border border-orange-100 uppercase tracking-widest shadow-sm">
                                                                 <AlertTriangle size={12} />
                                                                 {language === 'th' ? 'ต้องติดตาม' : 'Intervene'}
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-100 uppercase tracking-[0.1em] shadow-sm">
+                                                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100 uppercase tracking-widest shadow-sm">
                                                                 <Sparkles size={12} />
                                                                 {language === 'th' ? 'ปกติ' : 'Stable'}
                                                             </span>

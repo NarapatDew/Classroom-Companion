@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogOut } from 'lucide-react';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
@@ -62,9 +63,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
                             <button 
                                 onClick={onLogout}
-                                className="text-xs font-black text-slate-500 hover:text-rose-600 uppercase tracking-widest transition-all px-4 py-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-100"
+                                className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-slate-100"
+                                title={t('dashboard.signOut')}
                             >
-                                {t('dashboard.signOut')}
+                                <LogOut size={16} />
                             </button>
                         </div>
                         <div className="flex items-center gap-3 pl-3 md:pl-5 border-l border-slate-200 md:border-0">

@@ -69,10 +69,10 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.5rem] bg-emerald-50 text-emerald-500 mb-4 shadow-emerald-100 shadow-xl border border-emerald-100">
                         <CheckCircle2 size={24} />
                     </div>
-                    <h3 className="text-lg font-black text-slate-800 mb-2 tracking-tighter leading-tight">
+                    <h3 className="text-lg font-bold text-slate-800 mb-2 tracking-tight leading-tight">
                         {language === 'th' ? 'ไม่มีนักเรียนค้างงาน' : 'On Track'}
                     </h3>
-                    <p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest leading-relaxed">
+                    <p className="text-slate-400 font-bold uppercase text-xs tracking-widest leading-relaxed">
                         {language === 'th' 
                             ? 'ทุกคนส่งงานตามกำหนด' 
                             : 'All systems stable'}
@@ -89,12 +89,12 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
     return (
         <div className="space-y-4 flex flex-col h-full">
             <div className="px-2">
-                <h2 className="text-base font-black text-slate-800 flex items-center gap-2 tracking-tighter">
+                <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 tracking-tight">
                     <div className="p-1.5 bg-rose-100 text-rose-600 rounded-lg shadow-sm">
                         <AlertTriangle size={16} />
                     </div>
                     {language === 'th' ? 'ต้องติดตามเป็นพิเศษ' : 'Priority Attention'}
-                    <span className="ml-auto px-2 py-0.5 text-[10px] font-black bg-rose-600 text-white rounded-full shadow-md shadow-rose-200 leading-none">
+                    <span className="ml-auto px-2 py-0.5 text-xs font-bold bg-rose-600 text-white rounded-full shadow-md shadow-rose-200 leading-none">
                         {atRiskStudents.length}
                     </span>
                 </h2>
@@ -132,19 +132,19 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                                             name={student.name} 
                                             className="w-10 h-10 rounded-xl border border-white shadow-sm object-cover group-hover:rotate-3 transition-transform" 
                                         />
-                                        <div className="absolute -top-1 -right-1 bg-rose-600 text-white w-4.5 h-4.5 rounded-lg flex items-center justify-center text-[8px] font-black border-2 border-white">
+                                        <div className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold border-2 border-white shadow-lg">
                                             {student.missingAssignmentsCount}
                                         </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-extrabold text-slate-800 text-xs tracking-tight group-hover:text-rose-600 transition-colors truncate">
+                                        <h4 className="font-bold text-slate-800 text-sm tracking-tight group-hover:text-rose-600 transition-colors truncate">
                                             {student.name}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[8px] font-black uppercase tracking-[0.1em] text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-md border border-rose-100">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-md border border-rose-100">
                                                 {student.missingAssignmentsCount} {language === 'th' ? 'ชิ้น' : 'Left'}
                                             </span>
-                                            <span className="text-[8px] font-bold text-slate-300 uppercase truncate">
+                                            <span className="text-xs font-bold text-slate-300 uppercase truncate">
                                                 {student.completedAssignmentsCount || 0} {language === 'th' ? 'ส่งแล้ว' : 'Done'}
                                             </span>
                                         </div>
@@ -168,7 +168,7 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                                             <div className="h-px bg-slate-50 mb-4" />
                                             
                                             <div className="bg-rose-50/20 rounded-xl p-3 border border-rose-100/30">
-                                                <h5 className="text-[8px] font-black text-rose-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                                <h5 className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                                                     <FileText size={10} />
                                                     {language === 'th' ? 'รายการค้างส่ง' : 'To-do List'}
                                                 </h5>
@@ -176,10 +176,10 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                                                 <div className="space-y-2">
                                                     {missingAssignments.length > 0 ? (
                                                         missingAssignments.map((a) => (
-                                                            <div key={a.id} className="flex flex-col gap-1 text-[11px] text-slate-700 bg-white p-3 rounded-xl border border-slate-50 shadow-sm">
-                                                                <div className="font-extrabold text-slate-800 leading-tight line-clamp-2">{a.title}</div>
+                                                            <div key={a.id} className="flex flex-col gap-1 text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-50 shadow-sm">
+                                                                <div className="font-bold text-slate-800 leading-tight line-clamp-2">{a.title}</div>
                                                                 {a.dueDate && (
-                                                                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1">
+                                                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1">
                                                                         <Clock size={10} />
                                                                         {a.dueDate}
                                                                     </div>
@@ -187,7 +187,7 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                                                             </div>
                                                         ))
                                                     ) : (
-                                                        <p className="text-[9px] font-bold text-slate-300 italic text-center py-2 uppercase">No details</p>
+                                                        <p className="text-xs font-bold text-slate-300 italic text-center py-2 uppercase">No details</p>
                                                     )}
                                                 </div>
                                             </div>
