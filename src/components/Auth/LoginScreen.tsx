@@ -151,8 +151,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
                             <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-md font-medium pr-8">
                                 {language === 'th'
-                                    ? 'พื้นที่จัดการเรียนการสอนที่ถูกปรับแต่งมาเป็นพิเศษ เพื่อการติดตามงานและวัดผลอย่างมีประสิทธิภาพ'
-                                    : 'A customized workspace designed for efficient classroom management and submission tracking.'}
+                                    ? 'พื้นที่จัดการเรียนการสอนที่ถูกปรับแต่งเพื่อช่วยติดตามความคืบหน้า และติดตามนักเรียนที่ไม่ส่งงานได้อย่างมีประสิทธิภาพ'
+                                    : 'A customized workspace designed to help you track progress and efficiently follow up with students who haven\'t submitted work.'}
                             </p>
                         </div>
                     </div>
