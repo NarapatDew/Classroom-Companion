@@ -114,16 +114,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                     <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl"></div>
 
                     <div className="z-10">
-                        <div className="flex items-center gap-6 mb-12">
-                            <div className="flex gap-3">
-                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
-                                    <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-10 w-auto" />
+                        <div className="flex flex-col gap-6 mb-12">
+                            <div className="flex items-center gap-4">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                        <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-10 w-auto" />
+                                    </div>
+                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">KMUTNB</span>
                                 </div>
-                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
-                                    <img src="/logos/fte_logo.png" alt="FTE" className="h-10 w-auto" />
+                                <div className="h-10 w-px bg-white/10 mt-[-20px]"></div>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                        <img src="/logos/fte_logo.png" alt="FTE" className="h-10 w-auto" />
+                                    </div>
+                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">FTE</span>
                                 </div>
-                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
-                                    <img src="/logos/dce_logo.png" alt="DCE" className="h-10 w-auto" />
+                                <div className="h-10 w-px bg-white/10 mt-[-20px]"></div>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                        <img src="/logos/dce_logo.png" alt="DCE" className="h-10 w-auto" />
+                                    </div>
+                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">DCE</span>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +142,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-2">
                                 <Sparkles size={12} className="text-emerald-400" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Classroom Management System</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Classroom Companion System</span>
                             </div>
                             <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight">
                                 Classroom<br />
@@ -140,8 +151,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             
                             <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-md font-medium pr-8">
                                 {language === 'th'
-                                    ? 'ยกระดับการจัดการชั้นเรียนด้วยระบบติดตามผลการเรียนอัจฉริยะ'
-                                    : 'Elevate your classroom management with intelligent performance tracking.'}
+                                    ? 'พื้นที่จัดการเรียนการสอนที่ถูกปรับแต่งมาเป็นพิเศษ เพื่อการติดตามงานและวัดผลอย่างมีประสิทธิภาพ'
+                                    : 'A customized workspace designed for efficient classroom management and submission tracking.'}
                             </p>
                         </div>
                     </div>
@@ -175,12 +186,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         }}
                     />
 
-                    <div className="flex justify-between items-start mb-12 relative z-10">
-                        <div>
-                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{t('login.welcome')}</h2>
-                            <p className="text-slate-500 mt-2 font-medium">{t('login.subtitle')}</p>
-                        </div>
+                    {/* Relocated Language Toggle */}
+                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
                         <LanguageToggle />
+                    </div>
+
+                    <div className="text-center md:text-left mb-12 sm:mb-8 mt-4 sm:mt-0 relative z-10">
+                        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+                            {language === 'th' ? 'เข้าสู่ระบบจัดการชั้นเรียน' : 'Classroom Sign In'}
+                        </h2>
+                        <p className="text-slate-500 mt-2 font-medium">{t('login.subtitle')}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
