@@ -47,6 +47,8 @@ export interface Submission {
     userId: string;
     state: 'NEW' | 'CREATED' | 'TURNED_IN' | 'RETURNED' | 'RECLAIMED_BY_STUDENT';
     assignedGrade?: number;
+    late?: boolean;
+    updateTime?: string;
     alternateLink: string;
 }
 

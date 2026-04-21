@@ -11,43 +11,49 @@ interface AIInsightsProps {
 const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => {
     const { language, t } = useLanguage();
 
-    const analysis = useMemo(() => {
-        const now = new Date();
-        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const stats = useMemo(() => {
+        const total = assignments.length;
+        if (total === 0) return { consistency: 0, onTimeRate: 100, missingCount: 0, lateCount: 0 };
 
-        let missingCount = 0;
-        let upcomingCount = 0;
-        let criticalTask: any = null;
+        const turnedIn = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED');
+        const turnedInCount = turnedIn.length;
+        const missingCount = assignments.filter(a => {
+            const s = submissions.find(sub => sub.courseWorkId === a.id);
+            return !s || (s.state !== 'TURNED_IN' && s.state !== 'RETURNED');
+        }).length;
+
+        const lateCount = turnedIn.filter(s => s.late).length;
+
+        const consistency = Math.round((turnedInCount / total) * 100);
+        const onTimeRate = turnedInCount > 0 ? Math.round(((turnedInCount - lateCount) / turnedInCount) * 100) : 100;
+
+        return { consistency, onTimeRate, missingCount, lateCount };
+    }, [assignments, submissions]);
+
+    const analysis = useMemo(() => {
+        const { missingCount, lateCount, consistency, onTimeRate } = stats;
+
+        // Find the most urgent missing task if any
+        const missingAssignments = assignments.filter(a => {
+            const s = submissions.find(sub => sub.courseWorkId === a.id);
+            return !s || (s.state !== 'TURNED_IN' && s.state !== 'RETURNED');
+        });
+
+        let criticalTask: Assignment | null = null;
         let closestDueDate = Infinity;
 
-        assignments.forEach(a => {
-            const sub = submissions.find(s => s.courseWorkId === a.id);
-            const isTurnedIn = sub?.state === 'TURNED_IN' || sub?.state === 'RETURNED';
-            
-            if (isTurnedIn) return;
-
+        missingAssignments.forEach(a => {
             if (a.dueDate) {
                 const hr = a.dueTime?.hours || 23;
                 const min = a.dueTime?.minutes || 59;
                 const dueDateObj = new Date(Date.UTC(a.dueDate.year, a.dueDate.month - 1, a.dueDate.day, hr, min));
-                
-                if (dueDateObj.getTime() < now.getTime()) {
-                    missingCount++;
-                    if (!criticalTask || dueDateObj.getTime() < closestDueDate) {
-                        criticalTask = a;
-                        closestDueDate = dueDateObj.getTime();
-                    }
-                } else {
-                    const dueMidnight = new Date(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate()).getTime();
-                    const daysUntilDue = Math.round((dueMidnight - todayMidnight) / (1000 * 3600 * 24));
-                    if (daysUntilDue <= 3) {
-                        upcomingCount++;
-                    }
+                if (dueDateObj.getTime() < closestDueDate) {
+                    closestDueDate = dueDateObj.getTime();
+                    criticalTask = a;
                 }
             }
         });
 
-        // Generate AI Insight text
         let title = '';
         let feedback = '';
         let type: 'critical' | 'warning' | 'good' = 'good';
@@ -55,47 +61,45 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
 
         if (missingCount > 0) {
             type = 'critical';
+            const taskTitle = (criticalTask as any)?.title || (language === 'th' ? 'งานที่ค้าง' : 'your missing work');
             title = language === 'th' ? 'ต้องปรับกลยุทธ์เวลา' : 'Time Strategy Needed';
             feedback = language === 'th' 
                 ? `คุณมีงานค้างส่งอยู่ ${missingCount} ชิ้น สาเหตุอาจเกิดจากการประเมินเวลาทำงานน้อยเกินไป หรือมีงานแทรก`
-                : `You currently have ${missingCount} missing tasks. This backlog may be due to underestimating the time required.`;
+                : `You have ${missingCount} missing tasks. This may be due to underestimating the time needed or unexpected interruptions.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: แบ่งเวลา 30 นาทีวันนี้เพื่อเริ่มทำ "${criticalTask?.title || 'งานที่ค้าง'}" โดยปิดการแจ้งเตือนต่างๆ เพื่อโฟกัสเต็มที่`
-                : `Recommendation: Block 30 minutes today to start on "${criticalTask?.title || 'your missing work'}". Eliminate distractions to regain momentum.`;
-        } else if (upcomingCount > 0) {
+                ? `คำแนะนำ: แบ่งเวลา 30 นาทีวันนี้เพื่อเริ่มทำ "${taskTitle}" โดยปิดการแจ้งเตือนต่างๆ เพื่อโฟกัสเต็มที่`
+                : `Suggestion: Dedicate 30 minutes today to start on "${taskTitle}". Turn off notifications to focus deeply.`;
+        } else if (lateCount > 0) {
             type = 'warning';
-            title = language === 'th' ? 'รักษาระยะให้ดี' : 'Maintain Your Pace';
+            title = language === 'th' ? 'เกือบจะทันกำหนด' : 'Close to Deadlines';
             feedback = language === 'th'
-                ? `การส่งงานของคุณอยู่ในเกณฑ์ปกติ แต่มีงานด่วนรออยู่ ${upcomingCount} ชิ้นในเร็วๆ นี้`
-                : `Your submission rate is solid, but you have ${upcomingCount} upcoming tasks arriving soon.`;
+                ? `คุณส่งงานครบทุกชิ้น แต่มีการส่งสาย ${lateCount} ครั้งในช่วงที่ผ่านมา`
+                : `You have submitted everything, but were late for ${lateCount} tasks recently.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: ทยอยทำงานย่อยล่วงหน้าวันละนิด จะช่วยลดความกดดันและทำให้ผลงานมีประสิทธิภาพมากกว่าการโหมทำวันสุดท้าย`
-                : `Recommendation: Divide these upcoming tasks into smaller daily chunks. This reduces stress and improves final output quality.`;
+                ? `คำแนะนำ: ลองเริ่มทำงานล่วงหน้า 2 วันสำหรับงานสัปดาห์หน้า เพื่อสร้างพื้นที่ปลอดภัยให้กับตารางเวลาของคุณ`
+                : `Suggestion: Try starting work 2 days earlier next week to create a safety buffer in your schedule.`;
+        } else if (consistency < 80) {
+            type = 'warning';
+            title = language === 'th' ? 'รักษาระยะให้ดี' : 'Pace Yourself';
+            feedback = language === 'th'
+                ? `แนวโน้มการส่งงานของคุณอยู่ในระดับปานกลาง (${consistency}%) ควรเพิ่มความสม่ำเสมอเพื่อเกรดที่ดีขึ้น`
+                : `Your submission rate is moderate (${consistency}%). Aim for higher consistency to ensure better grades.`;
+            recommendation = language === 'th'
+                ? `คำแนะนำ: กำหนดเวลาทำการบ้านในปฏิทินให้เป็นเวลาเดิมทุกวันเพื่อสร้างนิสัย`
+                : `Suggestion: Schedule fixed homework slots in your calendar daily to build a routine.`;
         } else {
             type = 'good';
             title = language === 'th' ? 'การจัดเวลาของยอดเยี่ยม' : 'Excellent Time Management';
             feedback = language === 'th'
-                ? `คุณจัดการงานได้อย่างสมบูรณ์แบบ รูปแบบการจัดสรรเวลาส่งผลให้ไม่มีงานค้างและไม่มีความเครียดสะสม`
-                : `You have perfectly managed your assignments. Your strategy keeps you completely caught up with zero stress.`;
+                ? `คุณจัดการงานได้อย่างสมบูรณ์แบบ อัตราการส่งงานตรงเวลาของคุณคือ ${onTimeRate}%`
+                : `You managed your tasks perfectly. Your on-time submission rate is ${onTimeRate}%.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: รักษาวินัยการทำงานแบบนี้ต่อไป หรือลองใช้เวลาที่เหลือไปอ่านเนื้อหาล่วงหน้าครับ`
-                : `Recommendation: Keep up this fantastic discipline! Consider using free time to review upcoming materials.`;
+                ? `คำแนะนำ: รักษาวินัยการทำงานแบบนี้ต่อไป และลองหาเวลาว่างไปศึกษาเนื้อหาล่วงหน้าเพื่อความได้เปรียบครับ`
+                : `Suggestion: Maintain this discipline and use your extra time to pre-read upcoming materials for an advantage.`;
         }
 
         return { type, title, feedback, recommendation };
-    }, [assignments, submissions, language]);
-
-    const getColors = () => {
-        if (analysis.type === 'critical') return 'bg-red-50 border-red-200 text-red-900';
-        if (analysis.type === 'warning') return 'bg-orange-50 border-orange-200 text-orange-900';
-        return 'bg-emerald-50 border-emerald-200 text-emerald-900';
-    };
-
-    const getIcon = () => {
-        if (analysis.type === 'critical') return <AlertCircle className="text-red-500" size={24} />;
-        if (analysis.type === 'warning') return <Clock className="text-orange-500" size={24} />;
-        return <CheckCircle2 className="text-emerald-500" size={24} />;
-    };
+    }, [assignments, submissions, language, stats]);
 
     return (
         <div className="bg-white border border-border rounded-xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
@@ -111,13 +115,13 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
             </div>
             
             <div className="p-5 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5">
-                <div className={`p-4 rounded-xl border ${getColors()} shadow-sm relative overflow-hidden transition-all duration-300`}>
+                <div className={`p-4 rounded-xl border ${analysis.type === 'critical' ? 'bg-red-50 border-red-200 text-red-900' : analysis.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900'} shadow-sm relative overflow-hidden transition-all duration-300`}>
                     <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none transform translate-x-2 -translate-y-2">
-                        {getIcon()}
+                        {analysis.type === 'critical' ? <AlertCircle size={24} /> : analysis.type === 'warning' ? <Clock size={24} /> : <CheckCircle2 size={24} />}
                     </div>
                     
                     <div className="flex items-center gap-2 mb-3 relative z-10">
-                        {getIcon()}
+                        {analysis.type === 'critical' ? <AlertCircle className="text-red-500" size={24} /> : analysis.type === 'warning' ? <Clock className="text-orange-500" size={24} /> : <CheckCircle2 className="text-emerald-500" size={24} />}
                         <h4 className="font-bold text-sm sm:text-base">{analysis.title}</h4>
                     </div>
                     
@@ -133,27 +137,35 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
                     </div>
                 </div>
 
-                {/* Simulated Data Metrics for Visuals */}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-3">
                     <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        {language === 'th' ? 'ค่าสถิติของคุณ' : 'Your Stats'}
+                        {language === 'th' ? 'ค่าสถิติจริงของคุณ' : 'Your Actual Stats'}
                     </h5>
                     
                     <div className="space-y-3">
                         <div>
                             <div className="flex justify-between text-xs mb-1 font-semibold text-gray-600">
-                                <span>{language === 'th' ? 'ความสม่ำเสมอ' : 'Consistency'}</span>
-                                <span>{analysis.type === 'critical' ? '45%' : analysis.type === 'good' ? '98%' : '75%'}</span>
+                                <span>{language === 'th' ? 'อัตราความสำเร็จ (%)' : 'Consistency (Completion %)'}</span>
+                                <span>{stats.consistency}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full ${analysis.type === 'critical' ? 'bg-red-400 w-[45%]' : analysis.type === 'good' ? 'bg-emerald-400 w-[98%]' : 'bg-orange-400 w-[75%]'}`}></div>
+                                <div 
+                                    className={`h-full rounded-full transition-all duration-1000 ${stats.consistency < 60 ? 'bg-red-400' : stats.consistency < 90 ? 'bg-orange-400' : 'bg-emerald-400'}`}
+                                    style={{ width: `${stats.consistency}%` }}
+                                ></div>
                             </div>
                         </div>
 
                         <div>
                             <div className="flex justify-between text-xs mb-1 font-semibold text-gray-600">
-                                <span>{language === 'th' ? 'การจัดการเวลา' : 'Time Allocation'}</span>
-                                <span>{analysis.type === 'critical' ? 'needs focus' : 'optimal'}</span>
+                                <span>{language === 'th' ? 'ความตรงต่อเวลา (%)' : 'On-Time Rate (%)'}</span>
+                                <span>{stats.onTimeRate}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div 
+                                    className={`h-full rounded-full transition-all duration-1000 ${stats.onTimeRate < 60 ? 'bg-red-400' : stats.onTimeRate < 90 ? 'bg-orange-400' : 'bg-emerald-400'}`}
+                                    style={{ width: `${stats.onTimeRate}%` }}
+                                ></div>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import type { Course, Assignment, UserProfile, Submission } from '../types';
 
 const CLASSROOM_BASE_URL = 'https://classroom.googleapis.com/v1';
@@ -81,7 +81,7 @@ export const fetchStudentSubmissions = async (accessToken: string, courseId: str
             courseWorkId: s.courseWorkId,
             userId: s.userId,
             state: s.state,
-            assignedGrade: s.assignedGrade,
+            assignedGrade: s.assignedGrade, late: s.late || false, updateTime: s.updateTime,
             alternateLink: s.alternateLink
         }));
     } catch (error) {
@@ -119,7 +119,7 @@ export const fetchTeacherSubmissions = async (accessToken: string, courseId: str
             courseWorkId: s.courseWorkId,
             userId: s.userId,
             state: s.state,
-            assignedGrade: s.assignedGrade,
+            assignedGrade: s.assignedGrade, late: s.late || false, updateTime: s.updateTime,
             alternateLink: s.alternateLink
         }));
     } catch (error) {
