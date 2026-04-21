@@ -38,43 +38,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     return (
         <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
             {/* Department Header */}
-            <header className="bg-white border-b border-border py-3 px-4 md:px-6 xl:px-4 sticky top-0 z-50 shadow-sm bg-gradient-to-r from-white via-orange-50/30 to-white">
-                <div className="w-full max-w-6xl 2xl:max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
+            <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 py-4 px-4 md:px-8 xl:px-6 sticky top-0 z-50 shadow-sm transition-all duration-300">
+                <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                     {/* Branding */}
-                    <div className="flex items-center gap-3 w-full md:w-auto mb-4 md:mb-0">
-                        <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-10 w-auto hover:opacity-90 transition-opacity" />
+                    <div className="flex items-center gap-4 w-full md:w-auto mb-2 md:mb-0 transform hover:scale-[1.02] transition-transform">
+                        <div className="relative">
+                            <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-10 w-auto hover:opacity-90 transition-opacity" />
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 border-2 border-white rounded-full"></div>
+                        </div>
                         <div className="min-w-0 flex flex-col justify-center">
-                            <h1 className="text-xl font-black text-gray-800 tracking-tight leading-none">
+                            <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter leading-none">
                                 {t('brand.name')}
                             </h1>
-                            <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">{language === 'th' ? 'พื้นที่ของนักเรียน' : 'Student Workspace'}</p>
+                            <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mt-1.5 antialiased">
+                                {language === 'th' ? 'Student Workspace' : 'Student Workspace'}
+                            </p>
                         </div>
                     </div>
                     {/* User Profile */}
-                    <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                        <LanguageToggle />
-                        <div className="h-8 w-px bg-gray-200 mx-1"></div>
-                        <button 
-                            onClick={onLogout}
-                            className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
-                        >
-                            {t('dashboard.signOut')}
-                        </button>
-                        <div className="flex items-center gap-2 pl-2">
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end bg-slate-50 md:bg-transparent p-2 md:p-0 rounded-2xl border border-slate-100 md:border-0">
+                        <div className="flex items-center gap-3">
+                            <LanguageToggle />
+                            <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+                            <button 
+                                onClick={onLogout}
+                                className="text-xs font-black text-slate-500 hover:text-rose-600 uppercase tracking-widest transition-all px-4 py-2 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-100"
+                            >
+                                {t('dashboard.signOut')}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-3 pl-3 md:pl-5 border-l border-slate-200 md:border-0">
                             <div className="hidden sm:block text-right">
-                                <p className="text-sm font-bold text-gray-800">{user.name}</p>
+                                <p className="text-sm font-black text-slate-900 leading-none mb-1">{user.name}</p>
+                                <p className="text-[10px] font-bold text-slate-400 truncate max-w-[150px] uppercase tracking-wider">{user.email}</p>
                             </div>
-                            <img src={user.photoUrl} alt="Profile" className="w-9 h-9 rounded-full ring-2 ring-orange-100 shadow-sm object-cover" />
+                            <div className="relative group">
+                                <img src={user.photoUrl} alt="Profile" className="w-10 h-10 rounded-2xl ring-4 ring-orange-50 shadow-md object-cover transition-transform group-hover:scale-105" />
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full flex flex-col space-y-6">
+            <main className="flex-1 p-6 md:p-10 xl:p-8 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full flex flex-col space-y-8">
                 
-                <div className="w-full mx-auto space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+                <div className="w-full mx-auto space-y-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 xl:gap-10 items-start">
                         {/* AI Insights (Left) */}
                         <div className="lg:col-span-1 h-[600px]">
                             <AIInsights assignments={activeAssignments} submissions={submissions} />
@@ -86,17 +97,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                         </div>
 
                         {/* Global Progress (Right) */}
-                        <div className="lg:col-span-1 bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center justify-center h-[600px]">
-                            <h3 className="text-muted text-sm font-bold uppercase tracking-wider mb-8">{t('dashboard.overallProgress')}</h3>
-                            <ProgressRing percentage={globalCompletion} color={getProgressColor(globalCompletion)} size={180} strokeWidth={10} />
-                            <p className="mt-10 text-center text-sm text-text font-medium px-4">
-                                {globalCompletion === 100 
-                                    ? (language === 'th' ? 'สมบูรณ์แบบ! คุณส่งงานครบทุกชิ้นแล้ว' : 'Perfect! You have completed everything.')
-                                    : globalCompletion >= 60
-                                        ? (language === 'th' ? 'ทำได้ดีมาก! อีกนิดเดียวจะครบแล้ว' : 'Great job! You are almost there.')
-                                        : (language === 'th' ? 'พยายามเข้า! ยังมีงานที่ต้องส่งอยู่นะ' : 'Keep going! There are still tasks to submit.')
-                                }
-                            </p>
+                        <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-[2rem] p-8 shadow-2xl flex flex-col items-center justify-center h-[600px] relative overflow-hidden group">
+                            {/* Background Accents */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-[80px] rounded-full"></div>
+                            <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+
+                            <h3 className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] mb-12 relative z-10">{t('dashboard.overallProgress')}</h3>
+                            <div className="relative z-10 transform transition-transform duration-700 group-hover:scale-110">
+                                <ProgressRing percentage={globalCompletion} color={getProgressColor(globalCompletion)} size={200} strokeWidth={12} />
+                            </div>
+                            
+                            <div className="mt-12 relative z-10">
+                                <p className="text-center text-sm text-white font-extrabold px-6 leading-relaxed mb-4">
+                                    {globalCompletion === 100 
+                                        ? (language === 'th' ? 'สมบูรณ์แบบ! คุณส่งงานครบทุกชิ้นแล้ว' : 'Perfect! You have completed everything.')
+                                        : globalCompletion >= 60
+                                            ? (language === 'th' ? 'ทำได้ดีมาก! อีกนิดเดียวจะครบแล้ว' : 'Great job! You are almost there.')
+                                            : (language === 'th' ? 'พยายามเข้า! ยังมีงานที่ต้องส่งอยู่นะ' : 'Keep going! There are still tasks to submit.')
+                                    }
+                                </p>
+                                <div className="flex justify-center gap-1.5">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className={`h-1 rounded-full transition-all duration-500 ${
+                                            (globalCompletion >= 100) ? 'w-6 bg-emerald-500' :
+                                            (globalCompletion >= 60 && i <= 2) ? 'w-6 bg-amber-500' :
+                                            (globalCompletion < 60 && i <= 1) ? 'w-6 bg-rose-500' :
+                                            'w-2 bg-slate-700'
+                                        }`}></div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

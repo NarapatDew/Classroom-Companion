@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Calendar, Clock, CheckCircle2, AlertCircle, ChevronRight, Search, Inbox } from 'lucide-react';
 import type { Course, Assignment, Submission } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Clock, AlertTriangle, CalendarDays, ExternalLink } from 'lucide-react';
 
 interface UnifiedTodoProps {
     courses: Course[];
@@ -15,53 +15,38 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
     const { t, language } = useLanguage();
     const [filter, setFilter] = useState<FilterType>('ALL');
 
-    // Parse and process assignments to enrich with submission and course data
+    // Enhanced logic to merge assignments with course names and submission status
     const enhancedAssignments = useMemo(() => {
         const now = new Date();
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-        return assignments.map(assignment => {
-            // Find related course
-            const course = courses.find(c => c.id === assignment.courseId);
-            // Find related submission
-            const submission = submissions.find(s => s.courseWorkId === assignment.id);
-
+        return assignments.map(a => {
+            const course = courses.find(c => c.id === a.courseId);
+            const submission = submissions.find(s => s.courseWorkId === a.id);
             const isTurnedIn = submission?.state === 'TURNED_IN' || submission?.state === 'RETURNED';
 
-            let dueDateObj: Date | null = null;
             let daysUntilDue: number | null = null;
             let isPastDue = false;
+            let dueDateObj: Date | null = null;
 
-            if (assignment.dueDate) {
-                const hr = assignment.dueTime?.hours || 23;
-                const min = assignment.dueTime?.minutes || 59;
-
-                dueDateObj = new Date(Date.UTC(
-                    assignment.dueDate.year,
-                    assignment.dueDate.month - 1,
-                    assignment.dueDate.day,
-                    hr,
-                    min
-                ));
-
-                const timeDiff = dueDateObj.getTime() - now.getTime();
-                isPastDue = timeDiff < 0;
-
-                // Better daysUntilDue logic using midnight comparisons (calendar days instead of math on raw time diffs)
-                const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            if (a.dueDate) {
+                const hr = a.dueTime?.hours || 23;
+                const min = a.dueTime?.minutes || 59;
+                dueDateObj = new Date(Date.UTC(a.dueDate.year, a.dueDate.month - 1, a.dueDate.day, hr, min));
                 const dueMidnight = new Date(dueDateObj.getFullYear(), dueDateObj.getMonth(), dueDateObj.getDate()).getTime();
                 daysUntilDue = Math.round((dueMidnight - todayMidnight) / (1000 * 3600 * 24));
+                isPastDue = dueDateObj.getTime() < now.getTime() && !isTurnedIn;
             }
 
             return {
-                ...assignment,
+                ...a,
                 courseName: course?.name || 'Unknown Course',
                 isTurnedIn,
-                dueDateObj,
                 daysUntilDue,
                 isPastDue,
-                courseColor: (course?.name?.charCodeAt(0) ?? 0) % 5 || 0 // deterministic pseudo-random color class index
+                dueDateObj
             };
-        }).filter(a => !a.isTurnedIn); // Only show ones that are NOT turned in
+        });
     }, [assignments, courses, submissions]);
 
     // Apply filters
@@ -76,12 +61,9 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
             filtered = enhancedAssignments.filter(a => a.dueDateObj === null);
         }
 
-        // Include past due by default in all views unless it gets too much? 
-        // We'll bring past due items to the top if they are missing
         if (filter !== 'ALL' && filter !== 'NO_DUE') {
             const pastDueList = enhancedAssignments.filter(a => a.isPastDue);
             filtered = [...pastDueList, ...filtered];
-            // Remove duplicates (if any logic flaw)
             filtered = Array.from(new Set(filtered));
         }
 
@@ -97,135 +79,127 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
     }, [enhancedAssignments, filter]);
 
     const getStatusBadge = (item: any) => {
-        if (item.isPastDue) {
+        if (item.isTurnedIn) {
             return (
-                <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                    <AlertTriangle size={12} /> {t('todo.missing')}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-100/50">
+                    <CheckCircle2 size={12} />
+                    {t('todo.turnedIn')}
                 </span>
             );
         }
-        if (item.daysUntilDue !== null) {
-            if (item.daysUntilDue === 0) {
-                return (
-                    <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                        <AlertTriangle size={12} /> {language === 'th' ? 'กำหนดส่งวันนี้' : 'Due Today'}
-                    </span>
-                );
-            } else if (item.daysUntilDue > 0 && item.daysUntilDue <= 7) {
-                return (
-                    <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                        <Clock size={12} /> {t('todo.upcoming')}
-                    </span>
-                );
-            }
+        if (item.isPastDue) {
+            return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-100/50">
+                    <AlertCircle size={12} />
+                    {t('todo.missing')}
+                </span>
+            );
         }
-        return null;
-    };
-
-    const formatDueDate = (date: Date | null) => {
-        if (!date) return language === 'th' ? 'ไม่มีกำหนดส่ง' : 'No due date';
-        
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const dueDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const dayDiff = Math.round((dueDay.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        
-        const locale = language === 'th' ? 'th-TH' : 'en-US';
-        const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-        
-        if (dayDiff === 0) {
-            return language === 'th' ? `วันนี้ ${timeStr}` : `Today, ${timeStr}`;
-        } else if (dayDiff === 1) {
-            return language === 'th' ? `พรุ่งนี้ ${timeStr}` : `Tomorrow, ${timeStr}`;
-        } else if (dayDiff === -1) {
-            return language === 'th' ? `เมื่อวาน ${timeStr}` : `Yesterday, ${timeStr}`;
+        if (item.daysUntilDue !== null && item.daysUntilDue <= 2) {
+            return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold border border-amber-100/50">
+                    <Clock size={12} />
+                    {t('todo.urgent')}
+                </span>
+            );
         }
-        
-        return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) + ', ' + timeStr;
+        return (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-[11px] font-bold border border-slate-100/50">
+                <Calendar size={12} />
+                {t('todo.upcoming')}
+            </span>
+        );
     };
-
-    const colorClasses = [
-        'bg-blue-100 text-blue-700',
-        'bg-green-100 text-green-700',
-        'bg-purple-100 text-purple-700',
-        'bg-pink-100 text-pink-700',
-        'bg-indigo-100 text-indigo-700',
-    ];
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="flex items-center gap-2 shrink-0">
-                    <div className="p-1.5 bg-orange-100 text-orange-600 rounded-lg">
-                        <CalendarDays size={20} />
+        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
+            {/* Header Area */}
+            <div className="p-5 md:px-6 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-slate-900 text-white rounded-xl shadow-lg">
+                        <Inbox size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-800 tracking-tight whitespace-nowrap">{t('todo.title')}</h3>
+                    <div>
+                        <h3 className="font-extrabold text-slate-800 text-lg tracking-tight leading-none">
+                            {t('todo.title')}
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{filteredAssignments.length} Assignments remaining</p>
+                    </div>
                 </div>
-                {/* Filters */}
-                <div className="w-full mt-3 sm:mt-0 bg-gray-100/80 p-1 rounded-xl shadow-inner border border-gray-200/60">
-                    <div className="flex w-full gap-1">
-                        {[
-                            { key: 'ALL', label: t('todo.filterAll') },
-                            { key: 'TODAY', label: t('todo.filterToday') },
-                            { key: 'SOON', label: t('todo.filterSoon') },
-                            { key: 'NO_DUE', label: t('todo.filterNoDue') },
-                        ].map(f => (
-                            <button
-                                key={f.key}
-                                onClick={() => setFilter(f.key as FilterType)}
-                                className={`flex-1 px-1 sm:px-1.5 py-1 xl:py-1.5 text-[10px] xl:text-[11px] font-bold rounded-lg transition-all text-center select-none flex items-center justify-center min-h-[32px] ${filter === f.key ? 'bg-white text-blue-600 shadow-[0_1px_4px_rgba(0,0,0,0.1)] ring-1 ring-black/[0.04]' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200/60'}`}
-                            >
-                                <span className="whitespace-normal leading-tight break-words">{f.label}</span>
-                            </button>
-                        ))}
-                    </div>
+
+                <div className="flex items-center bg-slate-50/80 p-1 rounded-xl border border-slate-100">
+                    {[
+                        { key: 'ALL', label: t('todo.filterAll') },
+                        { key: 'TODAY', label: t('todo.filterToday') },
+                        { key: 'SOON', label: t('todo.filterSoon') },
+                        { key: 'NO_DUE', label: t('todo.filterNoDue') },
+                    ].map(f => (
+                        <button
+                            key={f.key}
+                            onClick={() => setFilter(f.key as FilterType)}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all uppercase ${
+                                filter === f.key 
+                                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' 
+                                : 'text-slate-500 hover:text-slate-800'
+                            }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            <div className="p-2 flex-1 overflow-y-auto custom-scrollbar bg-gray-50/30">
+            {/* List Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 bg-slate-50/30">
                 {filteredAssignments.length > 0 ? (
-                    <div className="space-y-2">
-                        {filteredAssignments.map((a) => {
-                            return (
-                                <a
-                                    key={a.id}
-                                    href={a.alternateLink || '#'}
-                                    target={a.alternateLink ? "_blank" : undefined}
-                                    rel="noopener noreferrer"
-                                    className="flex flex-col bg-white border border-gray-100 p-3.5 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 group relative"
-                                >
-                                    <div className="flex justify-between items-start gap-4">
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="text-[14px] leading-tight font-bold text-gray-800 group-hover:text-primary transition-colors pr-2 break-words" title={a.title}>
-                                            {a.title}
-                                        </h4>
-                                        <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                                            <span className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md ${colorClasses[a.courseColor]} truncate max-w-[140px] sm:max-w-full`} title={a.courseName}>
-                                                {a.courseName}
-                                            </span>
-                                            {getStatusBadge(a)}
+                    filteredAssignments.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => window.open(item.alternateLink, '_blank')}
+                            className="group w-full text-left bg-white p-5 rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 transform hover:-translate-y-1 block"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <div className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                            {item.courseName}
                                         </div>
+                                        {getStatusBadge(item)}
                                     </div>
-                                    <div className="flex flex-col items-end shrink-0 text-right">
-                                        <span className={`text-[11px] sm:text-xs font-semibold px-2 py-1 rounded-md border ${a.isPastDue ? 'text-red-600 border-red-100 bg-red-50' : 'text-gray-600 border-gray-100 bg-gray-50/80'} shadow-sm whitespace-nowrap`}>
-                                            {formatDueDate(a.dueDateObj)}
-                                        </span>
-                                        
-                                        <div className={`mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white px-2 py-1 rounded-md shadow-md bg-blue-600`}>
-                                            {t('todo.open')} 
-                                            <ExternalLink size={12} />
+                                    <h4 className="font-extrabold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1 text-sm sm:text-base">
+                                        {item.title}
+                                    </h4>
+                                    <div className="flex items-center gap-3 mt-3">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                                            <Calendar size={13} className="text-slate-300" />
+                                            <span>
+                                                {item.dueDate 
+                                                    ? `${item.dueDate.day}/${item.dueDate.month}/${item.dueDate.year}`
+                                                    : (language === 'th' ? 'ไม่มีกำหนด' : 'No due date')
+                                                }
+                                            </span>
                                         </div>
+                                        {item.dueTime && (
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                                                <Clock size={13} className="text-slate-300" />
+                                                <span>{String(item.dueTime.hours).padStart(2, '0')}:{String(item.dueTime.minutes || 0).padStart(2, '0')}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            </a>
-                        )})}
-                    </div>
+                                <div className="p-2 rounded-xl bg-slate-50 text-slate-300 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-all self-center shadow-inner">
+                                    <ChevronRight size={18} />
+                                </div>
+                            </div>
+                        </button>
+                    ))
                 ) : (
-                    <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400">
-                        <div className="bg-gray-100 p-4 rounded-full mb-3">
-                            <CalendarDays size={32} className="text-gray-300" />
+                    <div className="flex flex-col items-center justify-center h-48 text-center bg-white/50 rounded-2xl border-2 border-dashed border-slate-100 p-8">
+                        <div className="p-4 bg-slate-50 rounded-full mb-4 text-slate-300 animate-bounce">
+                            <Search size={32} />
                         </div>
-                        <p className="text-sm font-medium">{t('todo.noAssignments')}</p>
+                        <p className="text-slate-800 font-extrabold text-lg tracking-tight mb-1">{t('todo.noAssignments')}</p>
+                        <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">{language === 'th' ? 'ไม่มีงานในช่วงเวลานี้' : 'Everything is captured'}</p>
                     </div>
                 )}
             </div>

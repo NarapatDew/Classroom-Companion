@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BarChart3, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { BarChart3, AlertCircle, CheckCircle2, Clock, Sparkles, Target, Zap } from 'lucide-react';
 import type { Assignment, Submission } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -15,11 +15,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
         const total = assignments.length;
         if (total === 0) return { consistency: 0, onTimeRate: 100, missingCount: 0, lateCount: 0 };
 
-        const activeAssignmentIds = new Set(assignments.map(a => a.id));
-        const turnedIn = submissions.filter(s => 
-            activeAssignmentIds.has(s.courseWorkId) && 
-            (s.state === 'TURNED_IN' || s.state === 'RETURNED')
-        );
+        const turnedIn = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED');
         const turnedInCount = turnedIn.length;
         const missingCount = assignments.filter(a => {
             const s = submissions.find(sub => sub.courseWorkId === a.id);
@@ -37,7 +33,6 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
     const analysis = useMemo(() => {
         const { missingCount, lateCount, consistency, onTimeRate } = stats;
 
-        // Find the most urgent missing task if any
         const missingAssignments = assignments.filter(a => {
             const s = submissions.find(sub => sub.courseWorkId === a.id);
             return !s || (s.state !== 'TURNED_IN' && s.state !== 'RETURNED');
@@ -89,7 +84,7 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
                 ? `แนวโน้มการทำผลงานของคุณเริ่มมาดีแล้วนะ แต่อาจจะมีบางช่วงที่หลุดไปบ้าง ลองมาสร้างวินัยเล็กๆ เพื่อผลลัพธ์ที่น่าภูมิใจในระยะยาวกัน`
                 : `Your progress is looking good, but there are a few gaps. Let's build some small habits together for long-term success.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: ลองกำหนดเวลาเดิมในแต่ละวันเพื่อดู Classroom สัก 5-10 นาที การทำสม่ำเสมอคือกุญแจสำคัญสู่ความสำเร็จครับ`
+                ? `ลองกำหนดเวลาเดิมในแต่ละวัน เพื่อสร้างวินัยเล็กๆ การทำสม่ำเสมอคือกุญแจสำคัญสู่ความสำเร็จครับ`
                 : `Suggestion: Set a fixed time each day just to check Classroom for 5-10 minutes. Consistency is the key!`;
         } else {
             type = 'good';
@@ -106,68 +101,98 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
     }, [assignments, submissions, language, stats]);
 
     return (
-        <div className="bg-white border border-border rounded-xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg shadow-inner">
-                        <BarChart3 size={20} />
+        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden group">
+            {/* Header */}
+            <div className="p-4 md:p-5 border-b border-slate-50 bg-gradient-to-br from-indigo-50/40 via-white to-sky-50/40 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-indigo-100 shadow-lg">
+                        <BarChart3 size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-800 tracking-tight whitespace-nowrap">
-                        {t('insight.title')}
-                    </h3>
+                    <div>
+                        <h3 className="font-bold text-slate-800 text-base tracking-tight leading-none">
+                            {t('insight.title')}
+                        </h3>
+                        <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-1.5 opacity-80">Workspace Analytics</p>
+                    </div>
                 </div>
+                <Sparkles size={16} className="text-indigo-300 animate-pulse" />
             </div>
             
-            <div className="p-5 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5">
-                <div className={`p-4 rounded-xl border ${analysis.type === 'critical' ? 'bg-red-50 border-red-200 text-red-900' : analysis.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900'} shadow-sm relative overflow-hidden transition-all duration-300`}>
-                    <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none transform translate-x-2 -translate-y-2">
-                        {analysis.type === 'critical' ? <AlertCircle size={24} /> : analysis.type === 'warning' ? <Clock size={24} /> : <CheckCircle2 size={24} />}
+            <div className="p-6 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+                {/* Main Card */}
+                <div className={`p-5 rounded-2xl border-0 shadow-sm relative overflow-hidden transition-all duration-300 ${
+                    analysis.type === 'critical' ? 'bg-rose-50/80 text-rose-900 border-rose-100' : 
+                    analysis.type === 'warning' ? 'bg-amber-50/80 text-amber-900 border-amber-100' : 
+                    'bg-emerald-50/80 text-emerald-900 border-emerald-100'
+                }`}>
+                    {/* Background flourish icon */}
+                    <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none transform rotate-12 group-hover:scale-110 transition-transform duration-700">
+                        {analysis.type === 'critical' ? <Zap size={140} /> : analysis.type === 'warning' ? <Target size={140} /> : <Target size={140} />}
                     </div>
-                    
-                    <div className="flex items-center gap-2 mb-3 relative z-10">
-                        {analysis.type === 'critical' ? <AlertCircle className="text-red-500" size={24} /> : analysis.type === 'warning' ? <Clock className="text-orange-500" size={24} /> : <CheckCircle2 className="text-emerald-500" size={24} />}
-                        <h4 className="font-bold text-sm sm:text-base">{analysis.title}</h4>
+
+                    <div className="flex items-center gap-2.5 mb-4 relative z-10">
+                        <div className={`p-1.5 rounded-lg ${
+                            analysis.type === 'critical' ? 'bg-rose-100 text-rose-600' : 
+                            analysis.type === 'warning' ? 'bg-amber-100 text-amber-600' : 
+                            'bg-emerald-100 text-emerald-600'
+                        }`}>
+                            {analysis.type === 'critical' ? <AlertCircle size={20} /> : analysis.type === 'warning' ? <Clock size={20} /> : <CheckCircle2 size={20} />}
+                        </div>
+                        <h4 className="font-extrabold text-sm sm:text-base tracking-tight uppercase opacity-90">{analysis.title}</h4>
                     </div>
                     
                     <div className="space-y-4 relative z-10">
-                        <div className="text-sm leading-relaxed opacity-90 font-medium">
+                        <div className="text-sm leading-relaxed font-semibold opacity-90">
                             {analysis.feedback}
                         </div>
                         
-                        <div className="text-sm bg-white/60 p-3 rounded-lg border border-black/5 shadow-inner leading-relaxed">
-                            <span className="font-bold block mb-1">💡 {language === 'th' ? 'แนวทางแก้ไข' : 'Actionable Step'}:</span>
-                            {analysis.recommendation}
+                        <div className="text-[13px] bg-white/70 backdrop-blur-sm p-4 rounded-xl border border-white/20 shadow-sm leading-relaxed">
+                            <span className="font-bold flex items-center gap-1.5 mb-1.5 text-indigo-600">
+                                <Sparkles size={14} />
+                                {language === 'th' ? 'แนวทางแก้ไข' : 'Actionable Step'}:
+                            </span>
+                            <span className="text-slate-700 font-medium">{analysis.recommendation}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col gap-3">
-                    <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        {language === 'th' ? 'ค่าสถิติจริงของคุณ' : 'Your Actual Stats'}
-                    </h5>
+                {/* Real Stats Section */}
+                <div className="mt-auto pt-6 border-t border-slate-50 flex flex-col gap-5 bg-white relative">
+                    <div className="flex items-center justify-between">
+                        <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em]">
+                            {language === 'th' ? 'ค่าสถิติจริงของคุณ' : 'Performance Metrics'}
+                        </h5>
+                        <div className="h-px flex-1 bg-slate-100 ml-4"></div>
+                    </div>
                     
-                    <div className="space-y-3">
-                        <div>
-                            <div className="flex justify-between text-xs mb-1 font-semibold text-gray-600">
-                                <span>{language === 'th' ? 'อัตราความสำเร็จ (%)' : 'Consistency (Completion %)'}</span>
-                                <span>{stats.consistency}%</span>
+                    <div className="grid grid-cols-1 gap-5">
+                        <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50 hover:bg-slate-50 transition-colors">
+                            <div className="flex justify-between items-center mb-2.5">
+                                <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                                    {language === 'th' ? 'อัตราความสำเร็จ' : 'Consistency (Completion)'}
+                                </span>
+                                <span className="text-sm font-black text-slate-800">{stats.consistency}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-2.5 w-full bg-slate-200/50 rounded-full overflow-hidden shadow-inner p-0.5">
                                 <div 
-                                    className={`h-full rounded-full transition-all duration-1000 ${stats.consistency < 60 ? 'bg-red-400' : stats.consistency < 90 ? 'bg-orange-400' : 'bg-emerald-400'}`}
+                                    className={`h-full rounded-full transition-all duration-1000 shadow-sm ${stats.consistency < 60 ? 'bg-rose-500' : stats.consistency < 90 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                                     style={{ width: `${stats.consistency}%` }}
                                 ></div>
                             </div>
                         </div>
 
-                        <div>
-                            <div className="flex justify-between text-xs mb-1 font-semibold text-gray-600">
-                                <span>{language === 'th' ? 'ความตรงต่อเวลา (%)' : 'On-Time Rate (%)'}</span>
-                                <span>{stats.onTimeRate}%</span>
+                        <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50 hover:bg-slate-50 transition-colors">
+                            <div className="flex justify-between items-center mb-2.5">
+                                <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
+                                    {language === 'th' ? 'ความตรงต่อเวลา' : 'On-Time Rate'}
+                                </span>
+                                <span className="text-sm font-black text-slate-800">{stats.onTimeRate}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-2.5 w-full bg-slate-200/50 rounded-full overflow-hidden shadow-inner p-0.5">
                                 <div 
-                                    className={`h-full rounded-full transition-all duration-1000 ${stats.onTimeRate < 60 ? 'bg-red-400' : stats.onTimeRate < 90 ? 'bg-orange-400' : 'bg-emerald-400'}`}
+                                    className={`h-full rounded-full transition-all duration-1000 shadow-sm ${stats.onTimeRate < 60 ? 'bg-rose-500' : stats.onTimeRate < 90 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                                     style={{ width: `${stats.onTimeRate}%` }}
                                 ></div>
                             </div>

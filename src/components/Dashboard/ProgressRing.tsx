@@ -39,16 +39,16 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
                 <defs>
                     <linearGradient id={`gradient-${safeColorId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor={color} />
-                        <stop offset="100%" stopColor={color} stopOpacity="0.7" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0.85" />
                     </linearGradient>
-                    <filter id={`shadow-${safeColorId}`} x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor={color} floodOpacity="0.3" />
+                    <filter id={`shadow-${safeColorId}`} x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="12" floodColor={color} floodOpacity="0.35" />
                     </filter>
                 </defs>
 
                 {/* Background Track Circle */}
                 <circle
-                    stroke="#f1f5f9" // slate-100
+                    stroke="#1e293b" // slate-800 for dark mode compatibility
                     strokeWidth={strokeWidth}
                     fill="transparent"
                     r={radius}
@@ -72,12 +72,12 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
                     filter={`url(#shadow-${safeColorId})`}
                 />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-                <div className="flex items-baseline gap-1 drop-shadow-sm">
-                    <motion.span className="text-5xl font-black tracking-tight text-gray-800">
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none antialiased">
+                <div className="flex items-baseline gap-1 drop-shadow-xl">
+                    <motion.span className="text-6xl font-black tracking-tighter text-white">
                         {rounded}
                     </motion.span>
-                    <span className="text-2xl font-bold text-gray-500">%</span>
+                    <span className="text-2xl font-black text-slate-400">%</span>
                 </div>
             </div>
         </div>
