@@ -66,40 +66,40 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
         if (missingCount > 0) {
             type = 'critical';
             const taskTitle = (criticalTask as any)?.title || (language === 'th' ? 'งานที่ค้าง' : 'your missing work');
-            title = language === 'th' ? 'ต้องปรับกลยุทธ์เวลา' : 'Time Strategy Needed';
+            title = language === 'th' ? 'ก้าวเล็กๆ สู่ความสำเร็จ' : 'Small Steps to Success';
             feedback = language === 'th' 
-                ? `คุณมีงานค้างส่งอยู่ ${missingCount} ชิ้น สาเหตุอาจเกิดจากการประเมินเวลาทำงานน้อยเกินไป หรือมีงานแทรก`
-                : `You have ${missingCount} missing tasks. This may be due to underestimating the time needed or unexpected interruptions.`;
+                ? `เห็นว่ามีงานที่ยังไม่ได้ส่ง ${missingCount} ชิ้นนะ ไม่ต้องกังวลไป! บางครั้งเราอาจจะรู้สึกว่างานยากจนไม่กล้าเริ่ม หรือแค่ยังหาจังหวะที่ใช่ไม่ได้ ลองมาเริ่มกันวันละนิดดีไหม?`
+                : `You have ${missingCount} missing tasks. Don't worry! Sometimes tasks feel so hard we're afraid to start. Let's take it one small step at a time.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: แบ่งเวลา 30 นาทีวันนี้เพื่อเริ่มทำ "${taskTitle}" โดยปิดการแจ้งเตือนต่างๆ เพื่อโฟกัสเต็มที่`
-                : `Suggestion: Dedicate 30 minutes today to start on "${taskTitle}". Turn off notifications to focus deeply.`;
+                ? `ลองเริ่มจากสิ่งที่ง่ายที่สุดของงาน "${taskTitle}" แค่ 15 นาทีพอ ไม่ต้องสมบูรณ์แบบก็ได้ หัวใจสำคัญคือการ "ได้เริ่ม" ครับ สู้ๆ!`
+                : `Try starting with the easiest part of "${taskTitle}" for just 15 minutes. It doesn't have to be perfect; the most important thing is just getting started. You can do it!`;
         } else if (lateCount > 0) {
             type = 'warning';
-            title = language === 'th' ? 'เกือบจะทันกำหนด' : 'Close to Deadlines';
+            title = language === 'th' ? 'ฝึกจังหวะการเรียนให้ดีขึ้น' : 'Fine-tune Your Rhythm';
             feedback = language === 'th'
-                ? `คุณส่งงานครบทุกชิ้น แต่มีการส่งสาย ${lateCount} ครั้งในช่วงที่ผ่านมา`
-                : `You have submitted everything, but were late for ${lateCount} tasks recently.`;
+                ? `งานส่งครบเก่งมากเลย! แต่มีบางชิ้นที่ส่งช้าไปนิดเดียวเอง ลองปรับจังหวะให้เร็วขึ้นอีกหน่อย เพื่อให้มีเวลาพักผ่อนและทำสิ่งที่ชอบได้มากขึ้นนะ`
+                : `You've submitted everything, which is great! A few were just a bit late. Let's try to speed up the rhythm so you have more time for things you enjoy.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: ลองเริ่มทำงานล่วงหน้า 2 วันสำหรับงานสัปดาห์หน้า เพื่อสร้างพื้นที่ปลอดภัยให้กับตารางเวลาของคุณ`
-                : `Suggestion: Try starting work 2 days earlier next week to create a safety buffer in your schedule.`;
+                ? `สัปดาห์หน้าลองตั้งเป้าเริ่มทำงานให้เร็วขึ้น 1 วันดูนะ จะได้ไม่ต้องรีบช่วงท้าย ลองแล้วจะรู้ว่าเรียนแบบไม่เครียดมันสนุกกว่าเยอะเลย!`
+                : `Next week, try starting just one day earlier. You'll find that learning without the deadline stress is much more fun!`;
         } else if (consistency < 80) {
             type = 'warning';
-            title = language === 'th' ? 'รักษาระยะให้ดี' : 'Pace Yourself';
+            title = language === 'th' ? 'ค่อยๆ สร้างความสม่ำเสมอ' : 'Building Consistency';
             feedback = language === 'th'
-                ? `แนวโน้มการส่งงานของคุณอยู่ในระดับปานกลาง (${consistency}%) ควรเพิ่มความสม่ำเสมอเพื่อเกรดที่ดีขึ้น`
-                : `Your submission rate is moderate (${consistency}%). Aim for higher consistency to ensure better grades.`;
+                ? `แนวโน้มการทำผลงานของคุณเริ่มมาดีแล้วนะ แต่อาจจะมีบางช่วงที่หลุดไปบ้าง ลองมาสร้างวินัยเล็กๆ เพื่อผลลัพธ์ที่น่าภูมิใจในระยะยาวกัน`
+                : `Your progress is looking good, but there are a few gaps. Let's build some small habits together for long-term success.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: กำหนดเวลาทำการบ้านในปฏิทินให้เป็นเวลาเดิมทุกวันเพื่อสร้างนิสัย`
-                : `Suggestion: Schedule fixed homework slots in your calendar daily to build a routine.`;
+                ? `คำแนะนำ: ลองกำหนดเวลาเดิมในแต่ละวันเพื่อดู Classroom สัก 5-10 นาที การทำสม่ำเสมอคือกุญแจสำคัญสู่ความสำเร็จครับ`
+                : `Suggestion: Set a fixed time each day just to check Classroom for 5-10 minutes. Consistency is the key!`;
         } else {
             type = 'good';
-            title = language === 'th' ? 'การจัดเวลาของยอดเยี่ยม' : 'Excellent Time Management';
+            title = language === 'th' ? 'จัดการเวลาได้ยอดเยี่ยม' : 'Excellent Time Management';
             feedback = language === 'th'
-                ? `คุณจัดการงานได้อย่างสมบูรณ์แบบ อัตราการส่งงานตรงเวลาของคุณคือ ${onTimeRate}%`
-                : `You managed your tasks perfectly. Your on-time submission rate is ${onTimeRate}%.`;
+                ? `คุณกำลังอยู่บนเส้นทางแห่งความสำเร็จ! อัตราการส่งงานตรงเวลาของคุณคือ ${onTimeRate}% ซึ่งยอดเยี่ยมมากจริงๆ`
+                : `You are on the path to success! Your on-time submission rate is a fantastic ${onTimeRate}%.`;
             recommendation = language === 'th'
-                ? `คำแนะนำ: รักษาวินัยการทำงานแบบนี้ต่อไป และลองหาเวลาว่างไปศึกษาเนื้อหาล่วงหน้าเพื่อความได้เปรียบครับ`
-                : `Suggestion: Maintain this discipline and use your extra time to pre-read upcoming materials for an advantage.`;
+                ? `รักษามาตรฐานที่ยอดเยี่ยมนี้ไว้นะครับ นี่คือจุดเริ่มต้นของการสร้างโอกาสดีๆ ในอนาคต ลองใช้เวลาที่เหลือไปผ่อนคลายหรือหาความรู้อื่นๆ ที่สนใจดูนะ`
+                : `Keep up this excellent standard! This discipline will open many doors for you. Use your free time to relax or explore new interests.`;
         }
 
         return { type, title, feedback, recommendation };
