@@ -2,6 +2,7 @@ import React from 'react';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
+import AIInsights from './AIInsights';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
 
@@ -66,15 +67,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             {/* Main Content */}
             <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full flex flex-col space-y-6">
                 
-                <div className="w-full max-w-5xl mx-auto space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                        {/* Unified Todo List */}
-                        <div className="md:col-span-2 h-[600px]">
+                <div className="w-full mx-auto space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+                        {/* AI Insights (Left) */}
+                        <div className="lg:col-span-1 h-[600px]">
+                            <AIInsights assignments={activeAssignments} submissions={submissions} />
+                        </div>
+
+                        {/* Unified Todo List (Center) */}
+                        <div className="lg:col-span-2 h-[600px]">
                             <UnifiedTodo courses={activeCourses} assignments={activeAssignments} submissions={submissions} />
                         </div>
 
-                        {/* Global Progress */}
-                        <div className="bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center justify-center h-[600px]">
+                        {/* Global Progress (Right) */}
+                        <div className="lg:col-span-1 bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center justify-center h-[600px]">
                             <h3 className="text-muted text-sm font-bold uppercase tracking-wider mb-8">{t('dashboard.overallProgress')}</h3>
                             <ProgressRing percentage={globalCompletion} color="#188038" size={180} strokeWidth={10} />
                             <p className="mt-10 text-center text-sm text-text font-medium">

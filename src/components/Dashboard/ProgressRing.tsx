@@ -35,21 +35,14 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
 
     return (
         <div className="relative flex items-center justify-center p-2 group" style={{ width: size, height: size }}>
-            {/* Ambient Background Glow matching the ring color */}
-            <div 
-                className="absolute inset-0 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                style={{ backgroundColor: color }}
-            ></div>
-
-            <svg width={size} height={size} className="transform -rotate-90 overflow-visible relative z-10">
+            <svg width={size} height={size} className="transform -rotate-90 overflow-visible relative z-10 transition-transform duration-500 hover:scale-105">
                 <defs>
-                    <linearGradient id={`pulse-${safeColorId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id={`gradient-${safeColorId}`} x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor={color} />
-                        <stop offset="100%" stopColor={color} stopOpacity="0.4" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0.7" />
                     </linearGradient>
-                    <filter id={`glow-${safeColorId}`} x="-30%" y="-30%" width="160%" height="160%">
-                        <feGaussianBlur stdDeviation="6" result="blur" />
-                        <feBlend in="SourceGraphic" in2="blur" mode="screen" />
+                    <filter id={`shadow-${safeColorId}`} x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor={color} floodOpacity="0.3" />
                     </filter>
                 </defs>
 
@@ -63,26 +56,9 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
                     cy={size / 2}
                 />
                 
-                {/* Neon Glow Circle */}
-                <motion.circle
-                    stroke={color}
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    r={radius}
-                    cx={size / 2}
-                    cy={size / 2}
-                    strokeDasharray={circumference}
-                    strokeDashoffset={circumference}
-                    animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    strokeLinecap="round"
-                    filter={`url(#glow-${safeColorId})`}
-                    className="opacity-50"
-                />
-
                 {/* Main Solid Progress Circle */}
                 <motion.circle
-                    stroke={`url(#pulse-${safeColorId})`}
+                    stroke={`url(#gradient-${safeColorId})`}
                     strokeWidth={strokeWidth}
                     fill="transparent"
                     r={radius}
@@ -93,14 +69,15 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
                     animate={{ strokeDashoffset: offset }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                     strokeLinecap="round"
+                    filter={`url(#shadow-${safeColorId})`}
                 />
             </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center relative z-20">
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
                 <div className="flex items-baseline gap-1 drop-shadow-sm">
-                    <motion.span className="text-6xl font-black tracking-tighter text-gray-800">
+                    <motion.span className="text-5xl font-black tracking-tight text-gray-800">
                         {rounded}
                     </motion.span>
-                    <span className="text-3xl font-bold text-gray-600">%</span>
+                    <span className="text-2xl font-bold text-gray-500">%</span>
                 </div>
             </div>
         </div>

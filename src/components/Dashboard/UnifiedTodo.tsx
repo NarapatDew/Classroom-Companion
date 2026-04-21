@@ -155,11 +155,11 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
     return (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col h-full max-h-[600px] overflow-hidden">
             <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <div className="p-1.5 bg-orange-100 text-orange-600 rounded-lg">
                         <CalendarDays size={20} />
                     </div>
-                    <h3 className="font-bold text-gray-800 tracking-tight">{t('todo.title')}</h3>
+                    <h3 className="font-bold text-gray-800 tracking-tight whitespace-nowrap">{t('todo.title')}</h3>
                 </div>
                 {/* Filters */}
                 <div className="w-full mt-3 sm:mt-0 bg-gray-100/80 p-1 rounded-xl shadow-inner border border-gray-200/60">
