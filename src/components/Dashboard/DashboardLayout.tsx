@@ -1,10 +1,7 @@
 import React from 'react';
 import type { UserProfile, Course, Assignment, Submission } from '../../types';
-import StatCard from './StatCard';
 import ProgressRing from './ProgressRing';
 import UnifiedTodo from './UnifiedTodo';
-import SmartCompanion from './SmartCompanion';
-import { Folder, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
 
@@ -23,22 +20,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     const totalAssignments = assignments.length;
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
     const globalCompletion = totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0;
-
-    // Calculate Missing Tasks
-    const missingTasks = assignments.filter(a => {
-        const sub = submissions.find(s => s.courseWorkId === a.id);
-        const isTurnedIn = sub?.state === 'TURNED_IN' || sub?.state === 'RETURNED';
-        if (isTurnedIn) return false;
-        
-        let isPastDue = false;
-        if (a.dueDate) {
-            const hr = a.dueTime?.hours || 23;
-            const min = a.dueTime?.minutes || 59;
-            const dueDateObj = new Date(Date.UTC(a.dueDate.year, a.dueDate.month - 1, a.dueDate.day, hr, min));
-            isPastDue = dueDateObj.getTime() - new Date().getTime() < 0;
-        }
-        return isPastDue;
-    }).length;
 
     // Separate Active Courses
     const activeCourses = courses.filter(c => c.courseState === 'ACTIVE' || !c.courseState); // Default to active if undefined
@@ -85,26 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
             {/* Main Content */}
             <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full flex flex-col space-y-6">
                 
-                {/* Top Row: Metrics (Always on top) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <StatCard
-                                title={language === 'th' ? 'งานค้างส่ง' : 'Missing Tasks'}
-                                value={missingTasks}
-                                icon={AlertTriangle}
-                            />
-                            <StatCard
-                                title={t('dashboard.activeCourses')}
-                                value={activeCourses.length}
-                                icon={Folder}
-                            />
-                        </div>
-
                 <div className="w-full max-w-5xl mx-auto space-y-6">
-                    {/* Proactive Smart Companion Assistant */}
-                    <div className="w-full">
-                        <SmartCompanion assignments={activeAssignments} submissions={submissions} />
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                         {/* Unified Todo List */}
                         <div className="md:col-span-2 h-[600px]">
