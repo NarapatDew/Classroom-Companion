@@ -114,33 +114,34 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                     <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl"></div>
 
                     <div className="z-10">
-                        <div className="flex items-center gap-5 transition-all duration-700 bg-white/5 p-4 rounded-3xl backdrop-blur-md border border-white/5 mb-12 group-hover:bg-white/10">
-                            <div className="flex -space-x-3">
-                                <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full p-1.5 bg-white shadow-xl ring-2 ring-white/10 z-30" />
-                                <img src="/logos/fte_logo.png" alt="FTE" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full p-1.5 bg-white shadow-xl ring-2 ring-white/10 z-20" />
-                                <img src="/logos/dce_logo.png" alt="DCE" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full p-1.5 bg-white shadow-xl ring-2 ring-white/10 z-10" />
-                            </div>
-                            <div className="h-8 w-px bg-white/10"></div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 leading-none mb-1">Partnership</span>
-                                <span className="text-xs font-bold text-white/60 leading-none">Powered by KMUTNB</span>
+                        <div className="flex items-center gap-6 mb-12">
+                            <div className="flex gap-3">
+                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                    <img src="/logos/kmutnb_logo.png" alt="KMUTNB" className="h-10 w-auto" />
+                                </div>
+                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                    <img src="/logos/fte_logo.png" alt="FTE" className="h-10 w-auto" />
+                                </div>
+                                <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
+                                    <img src="/logos/dce_logo.png" alt="DCE" className="h-10 w-auto" />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-2">
                                 <Sparkles size={12} className="text-emerald-400" />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Classroom Companion</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Classroom Management System</span>
                             </div>
-                            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
-                                {language === 'th' ? 'ก้าวไปได้ไกลขึ้น' : 'Go Further,'}<br />
-                                <span className="text-emerald-400">{language === 'th' ? 'ด้วยความเข้าใจ' : 'Together.'}</span>
+                            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight">
+                                Classroom<br />
+                                <span className="text-emerald-400">Companion</span>
                             </h1>
                             
                             <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-md font-medium pr-8">
                                 {language === 'th'
-                                    ? 'ตัวช่วยสำหรับการเรียนและการสอน จัดการงานในคลาสได้ง่ายขึ้น และเห็นข้อมูลสำคัญได้ชัดเจนขึ้น'
-                                    : 'A better workspace to manage your classroom workflows—faster, clearer, and smarter.'}
+                                    ? 'ยกระดับการจัดการชั้นเรียนด้วยระบบติดตามผลการเรียนอัจฉริยะ'
+                                    : 'Elevate your classroom management with intelligent performance tracking.'}
                             </p>
                         </div>
                     </div>
