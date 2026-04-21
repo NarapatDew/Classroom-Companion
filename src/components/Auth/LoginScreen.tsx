@@ -134,7 +134,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                     <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
                                         <img src="/logos/dce_logo.png" alt="CED" className="h-10 w-auto" />
                                     </div>
-                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">DCE</span>
+                                    <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">CED</span>
                                 </div>
                             </div>
                         </div>
