@@ -213,21 +213,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                         ? 'จัดลำดับงานสำคัญ ดูข้อมูลวิเคราะห์รายบุคคล และติดตามความก้าวหน้าของคุณ'
                                         : 'Prioritize tasks, see personalized insights, and keep track of your learning journey.'}
                                 </p>
-                                <button
-                                    onClick={() => login()}
-                                    disabled={loading}
-                                    className="w-full h-12 flex items-center justify-center gap-3 bg-slate-900 text-white rounded-2xl hover:bg-emerald-600 transition-all font-bold text-sm shadow-xl shadow-slate-900/10 active:scale-95"
-                                >
-                                    {loading ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    ) : (
-                                        <>
-                                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 bg-white p-1 rounded-full" />
-                                            <span>{t('login.googleSignIn')}</span>
-                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                                        </>
-                                    )}
-                                </button>
+                                    <button
+                                        onClick={() => login()}
+                                        disabled={loading}
+                                        className="w-full h-12 flex items-center justify-center gap-3 bg-slate-900 text-white rounded-2xl hover:bg-emerald-600 transition-all font-bold text-sm shadow-xl shadow-slate-900/10 active:scale-95 px-6"
+                                    >
+                                        {loading ? (
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        ) : (
+                                            <>
+                                                <div className="bg-white p-1.5 rounded-full shadow-sm ring-1 ring-white/20 group-hover:scale-110 transition-transform">
+                                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4" />
+                                                </div>
+                                                <span className="flex-1 text-center">{t('login.googleSignIn')}</span>
+                                                <ArrowRight size={16} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                            </>
+                                        )}
+                                    </button>
                             </div>
                         </div>
 
@@ -246,10 +248,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 </p>
                                 <button
                                     onClick={handleTeacherLogin}
-                                    className="w-full h-12 flex items-center justify-center gap-3 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:text-white transition-all font-bold text-sm active:scale-95"
+                                    className="w-full h-12 flex items-center justify-center gap-3 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl hover:bg-slate-900 hover:text-white transition-all font-bold text-sm active:scale-95 px-6 group/btn"
                                 >
-                                    <span>{t('login.openInstructor')}</span>
-                                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                    <div className="bg-white p-1.5 rounded-full shadow-sm ring-1 ring-slate-100 group-hover/btn:ring-white/20 transition-all">
+                                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4" />
+                                    </div>
+                                    <span className="flex-1 text-center">{t('login.openInstructor')}</span>
+                                    <ArrowRight size={16} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                 </button>
                             </div>
                         </div>
