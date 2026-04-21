@@ -4,8 +4,7 @@ import {
     AlertTriangle,
     LogOut,
     ChevronDown,
-    Check,
-    Download
+    Check
 } from 'lucide-react';
 // Removed Recharts
 import {
@@ -205,34 +204,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
         }
     };
 
-    const handleExportCSV = () => {
-        if (!activeCourse) return;
-
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-
-        const headers = ['Student Name', 'Missing Tasks', ...assignments.map(a => a.title.replace(/,/g, ' '))];
-        csvContent += headers.join(",") + "\n";
-
-        students.forEach(student => {
-            const row = [
-                `"${student.name}"`,
-                student.missingAssignmentsCount,
-                ...assignments.map(a => {
-                    const sub = submissions.find(s => s.studentId === student.id && s.assignmentId === a.id);
-                    return sub ? `"${sub.status}"` : '"ASSIGNED"';
-                })
-            ];
-            csvContent += row.join(",") + "\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `ClassroomTracker_${activeCourse.name}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-slate-800">
@@ -412,12 +383,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                             <h3 className="font-semibold text-gray-700">{language === 'th' ? 'รายชื่อนักเรียนและการส่งงาน' : 'Student Roster & Tracking'}</h3>
                             <div className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{students.length} {language === 'th' ? 'คน' : 'Students'}</div>
                         </div>
-                        <button
-                            onClick={handleExportCSV}
-                            className="text-xs flex items-center justify-center gap-1.5 font-bold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:shadow-sm px-3 py-1.5 rounded-md transition-all active:scale-95"
-                        >
-                            <Download size={14} /> {language === 'th' ? 'ส่งออกบัญชีรายชื่อ (CSV)' : 'Export Roster (CSV)'}
-                        </button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
