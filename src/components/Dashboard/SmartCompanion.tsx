@@ -6,10 +6,9 @@ import { useLanguage } from '../../contexts/LanguageContext';
 interface SmartCompanionProps {
     assignments: Assignment[];
     submissions: Submission[];
-    onEnterFocusMode?: (assignment: Assignment) => void;
 }
 
-const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submissions, onEnterFocusMode }) => {
+const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submissions }) => {
     const { language } = useLanguage();
 
     const advice = useMemo(() => {
@@ -54,7 +53,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                 title: language === 'th' ? 'ก้าวแรกสำคัญที่สุดเสมอ 🌟' : 'You can do this! 🌟',
                 message: language === 'th' 
                     ? `ลืมส่ง "${missingTasks[0].title}" ไปหรือเปล่า? ไม่เป็นไรครับ เริ่มเปิดงานขึ้นมาตอนนี้เลย ทุกความพยายามเล็กๆ มีความหมาย!`
-                    : `Looks like "${missingTasks[0].title}" slipped by. No worries! Jump into Focus Mode now and let's tackle it together.`,
+                    : `Looks like "${missingTasks[0].title}" slipped by. No worries! Jump in right now and let's tackle it together.`,
                 actionLink: missingTasks[0].alternateLink,
                 targetAssignment: missingTasks[0],
                 icon: AlertCircle,
@@ -120,15 +119,7 @@ const SmartCompanion: React.FC<SmartCompanionProps> = ({ assignments, submission
                         <p className={`text-sm leading-relaxed max-w-xl ${advice.descColor}`}>{advice.message}</p>
                     </div>
                 </div>
-                {advice.targetAssignment && onEnterFocusMode ? (
-                    <button 
-                        onClick={() => onEnterFocusMode(advice.targetAssignment as Assignment)}
-                        className={`shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 active:scale-95 z-10 ${advice.btnColors}`}
-                    >
-                        {language === 'th' ? 'เข้าสู่ Focus Mode' : 'Enter Focus Mode'}
-                        <ArrowRight size={16} strokeWidth={2.5} />
-                    </button>
-                ) : advice.actionLink ? (
+                {advice.actionLink ? (
                     <a 
                         href={advice.actionLink}
                         target="_blank"

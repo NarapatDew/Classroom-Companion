@@ -1,18 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import type { Course, Assignment, Submission } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Clock, AlertTriangle, CalendarDays, ExternalLink, Calendar, Target } from 'lucide-react';
+import { Clock, AlertTriangle, CalendarDays, ExternalLink } from 'lucide-react';
 
 interface UnifiedTodoProps {
     courses: Course[];
     assignments: Assignment[];
     submissions: Submission[];
-    onEnterFocusMode?: (assignment: Assignment) => void;
 }
 
 type FilterType = 'ALL' | 'TODAY' | '3DAYS' | '7DAYS';
 
-const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions, onEnterFocusMode }) => {
+const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions }) => {
     const { t, language } = useLanguage();
     const [filter, setFilter] = useState<FilterType>('ALL');
 
@@ -106,16 +105,16 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
             );
         }
         if (item.daysUntilDue !== null) {
-            if (item.daysUntilDue <= 1) {
+            if (item.daysUntilDue === 0) {
                 return (
-                    <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                        <Clock size={12} /> {t('todo.urgent')}
+                    <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 font-bold text-xs px-2 py-0.5 rounded-full">
+                        <AlertTriangle size={12} /> {language === 'th' ? 'กำหนดส่งวันนี้' : 'Due Today'}
                     </span>
                 );
-            } else if (item.daysUntilDue <= 3) {
+            } else if (item.daysUntilDue > 0 && item.daysUntilDue <= 7) {
                 return (
-                    <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 font-bold text-xs px-2 py-0.5 rounded-full">
-                        <Calendar size={12} /> {t('todo.upcoming')}
+                    <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 font-bold text-xs px-2 py-0.5 rounded-full">
+                        <Clock size={12} /> {t('todo.upcoming')}
                     </span>
                 );
             }
@@ -187,22 +186,12 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                 {filteredAssignments.length > 0 ? (
                     <div className="space-y-2">
                         {filteredAssignments.map((a) => {
-                            const isFocusable = !!onEnterFocusMode;
-                            
-                            const handleClick = (e: React.MouseEvent) => {
-                                if (isFocusable) {
-                                    e.preventDefault();
-                                    onEnterFocusMode(a);
-                                }
-                            };
-
                             return (
                                 <a
                                     key={a.id}
                                     href={a.alternateLink || '#'}
-                                    target={!isFocusable && a.alternateLink ? "_blank" : undefined}
+                                    target={a.alternateLink ? "_blank" : undefined}
                                     rel="noopener noreferrer"
-                                    onClick={handleClick}
                                     className="flex flex-col bg-white border border-gray-100 p-3.5 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-[0_8px_20px_-6px_rgba(6,81,237,0.15)] hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 group relative"
                                 >
                                     <div className="flex justify-between items-start gap-4">
@@ -222,9 +211,9 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                                             {formatDueDate(a.dueDateObj)}
                                         </span>
                                         
-                                        <div className={`mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white px-2 py-1 rounded-md shadow-md ${isFocusable ? 'bg-indigo-600' : 'bg-blue-600'}`}>
-                                            {isFocusable ? (language === 'th' ? 'เข้าสู่ Focus Mode' : 'Focus Mode') : t('todo.open')} 
-                                            {isFocusable ? <Target size={12} /> : <ExternalLink size={12} />}
+                                        <div className={`mt-3 opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1 text-[10px] font-bold text-white px-2 py-1 rounded-md shadow-md bg-blue-600`}>
+                                            {t('todo.open')} 
+                                            <ExternalLink size={12} />
                                         </div>
                                     </div>
                                 </div>
