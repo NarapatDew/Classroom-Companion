@@ -4,9 +4,13 @@ import {
     AlertTriangle,
     LogOut,
     ChevronDown,
-    Check
+    Check,
+    Search,
+    BookOpen,
+    Sparkles,
+    LayoutDashboard,
+    Target
 } from 'lucide-react';
-// Removed Recharts
 import {
     fetchCourses,
     fetchCourseStudents,
@@ -17,7 +21,7 @@ import type { Course, UserProfile } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import LanguageToggle from '../common/LanguageToggle';
 import AtRiskPanel from './AtRiskPanel';
-// --- Types ---
+
 interface TeacherDashboardProps {
     onLogout: () => void;
     accessToken?: string;
@@ -70,52 +74,34 @@ const StudentAvatar: React.FC<{ url: string; name: string; className?: string }>
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessToken, user }) => {
     const { language, t } = useLanguage();
-    // --- State ---
-    const [loading, setLoading] = useState(false);
     const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
     const [courses, setCourses] = useState<Course[]>([]);
     const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
 
-    // Data State
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
 
-    // Initial Fetch (Real Data)
     useEffect(() => {
         const loadRealData = async () => {
             if (!accessToken) return;
-            setLoading(true);
             try {
-                // 1. Fetch Courses
                 const realCourses = await fetchCourses(accessToken, 'me');
                 setCourses(realCourses);
 
                 if (realCourses.length > 0) {
                     const firstCourseId = realCourses[0].id;
                     setActiveCourseId(firstCourseId);
-
-                    // 2. Fetch Data for First Course
                     await loadCourseData(accessToken, firstCourseId);
-                } else {
-                    // No courses found where user is teacher
-                    setAssignments([]);
-                    setStudents([]);
-                    setSubmissions([]);
                 }
             } catch (err) {
                 console.error("Failed to load real data", err);
-            } finally {
-                setLoading(false);
             }
         };
-
         loadRealData();
     }, [accessToken]);
 
-    // Load Data for Specific Course
     const loadCourseData = async (token: string, courseId: string) => {
-        setLoading(true);
         try {
             const [apiStudents, apiWork, apiSubs] = await Promise.all([
                 fetchCourseStudents(token, courseId),
@@ -123,18 +109,15 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                 fetchTeacherSubmissions(token, courseId)
             ]);
 
-            // Transform Students
             const realStudents: Student[] = apiStudents.map((s: any) => ({
                 id: s.userId,
                 name: s.profile?.name?.fullName || 'Unknown Student',
                 avatarUrl: s.profile?.photoUrl
                     ? (s.profile.photoUrl.startsWith('http') ? s.profile.photoUrl : `https:${s.profile.photoUrl}`)
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.profile?.name?.fullName || 'Student')}&background=random&color=fff&size=128`,
-                overallGrade: 0,
                 missingAssignmentsCount: 0
             }));
 
-            // Transform Assignments
             const realAssignments: Assignment[] = apiWork.map((w: any) => ({
                 id: w.id,
                 title: w.title,
@@ -143,7 +126,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                 completionRate: 0
             }));
 
-            // Transform Submissions
             const realSubmissions: Submission[] = apiSubs.map(s => {
                 let status: Submission['status'] = 'ASSIGNED';
                 if (s.state === 'TURNED_IN' || s.state === 'RETURNED') status = 'TURNED_IN';
@@ -159,7 +141,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
                 };
             });
 
-            // --- Calculate Derived Stats for Real Data ---
             const totalStudentsCount = realStudents.length;
 
             realAssignments.forEach(a => {
@@ -177,19 +158,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
             setStudents(realStudents);
             setAssignments(realAssignments);
             setSubmissions(realSubmissions);
-
         } catch (error) {
             console.error("Error loading course details", error);
-        } finally {
-            setLoading(false);
         }
     };
 
-    // --- Analytics Calculations ---
     const stats = useMemo(() => {
         const totalStudents = students.length;
         if (totalStudents === 0) return { totalStudents: 0, atRiskCount: 0 };
-
         const atRiskCount = students.filter(s => s.missingAssignmentsCount >= 2).length;
         return { totalStudents, atRiskCount };
     }, [students]);
@@ -204,255 +180,236 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onLogout, accessTok
         }
     };
 
-
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-slate-800">
-            {/* Top Navigation Bar */}
-            <header className="bg-white border-b border-gray-200 px-4 md:px-6 xl:px-4 py-3 sticky top-0 z-50 gap-y-4 shadow-sm">
-                <div className="w-full max-w-6xl 2xl:max-w-7xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-between gap-y-4">
+        <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans text-slate-800 antialiased">
+            {/* SaaS Style Header */}
+            <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 px-4 md:px-8 xl:px-6 py-4 sticky top-0 z-50 shadow-sm transition-all duration-300">
+                <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto flex items-center justify-between gap-6">
+                    
+                    {/* Left: Branding & Course Switcher */}
+                    <div className="flex items-center gap-8 flex-1 min-w-0">
+                        <div className="flex items-center gap-4 shrink-0">
+                            <div className="relative">
+                                <img src="/logos/dce_logo.png" alt="Logo" className="h-10 w-auto hover:opacity-90 transition-opacity" />
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div className="hidden lg:block min-w-0">
+                                <h1 className="text-xl font-black text-slate-900 tracking-tighter leading-none">
+                                    {t('brand.name')}
+                                </h1>
+                                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1.5 antialiased">Instructor Portal</p>
+                            </div>
+                        </div>
 
-                    {/* Left: Modern Prominent Course Selector */}
-                    <div className="w-full md:w-1/3 flex justify-start order-2 md:order-1 relative z-50">
-                        {accessToken && courses.length > 0 ? (
-                            <div className="relative w-full max-w-[320px]">
-                                <button
-                                    onClick={() => setIsCourseMenuOpen(!isCourseMenuOpen)}
-                                    className="w-full bg-white hover:bg-gray-50 border-2 border-green-500/20 hover:border-green-500 flex items-center justify-between px-4 py-2.5 rounded-xl shadow-sm transition-all duration-200 group focus:outline-none focus:ring-4 focus:ring-green-500/10"
-                                >
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="bg-green-100 text-green-700 p-1.5 rounded-lg shrink-0">
-                                            <Users size={18} className="group-hover:scale-110 transition-transform" />
+                        <div className="h-8 w-px bg-slate-100 hidden md:block"></div>
+
+                        {/* Modern Course Selector */}
+                        <div className="relative group">
+                            <button
+                                onClick={() => setIsCourseMenuOpen(!isCourseMenuOpen)}
+                                className="bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center gap-3 px-4 py-2.5 rounded-2xl shadow-sm transition-all duration-200 group active:scale-95"
+                            >
+                                <div className="bg-emerald-100 text-emerald-600 p-1.5 rounded-xl shrink-0 group-hover:scale-110 transition-transform">
+                                    <BookOpen size={16} />
+                                </div>
+                                <div className="flex flex-col text-left max-w-[180px] lg:max-w-[240px]">
+                                    <span className="text-xs font-black text-slate-800 truncate">
+                                        {activeCourse ? activeCourse.name : 'Select Course'}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                                        {activeCourse?.section ? `Sec ${activeCourse.section}` : 'Manage Classroom'}
+                                    </span>
+                                </div>
+                                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isCourseMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {/* Dropdown */}
+                            {isCourseMenuOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsCourseMenuOpen(false)} />
+                                    <div className="absolute top-[calc(100%+12px)] left-0 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="px-5 py-2 border-b border-slate-50 mb-2">
+                                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Quick Switch</h3>
                                         </div>
-                                        <div className="flex flex-col text-left overflow-hidden">
-                                            <span className="text-sm font-bold text-gray-800 truncate">
-                                                {activeCourse ? activeCourse.name : 'Select a Course'}
-                                            </span>
-                                            {activeCourse && (activeCourse.section || activeCourse.room) ? (
-                                                <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider truncate mt-0.5">
-                                                    {activeCourse.section && `Sec ${activeCourse.section}`}
-                                                    {activeCourse.section && activeCourse.room && <span className="mx-1">•</span>}
-                                                    {activeCourse.room && `Room ${activeCourse.room}`}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[11px] font-medium text-gray-400 mt-0.5 animate-pulse">
-                                                    {loading ? 'Syncing...' : 'Click to change class'}
-                                                </span>
-                                            )}
+                                        <div className="max-h-72 overflow-y-auto custom-scrollbar px-2">
+                                            {courses.map(c => (
+                                                <button
+                                                    key={c.id}
+                                                    onClick={() => handleCourseChange(c.id)}
+                                                    className={`w-full text-left px-3 py-3 my-1 rounded-xl transition-all flex items-center justify-between group ${activeCourseId === c.id ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}
+                                                >
+                                                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                                                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeCourseId === c.id ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-slate-200'}`} />
+                                                        <span className={`font-bold text-xs truncate ${activeCourseId === c.id ? 'text-emerald-800' : 'text-slate-600'}`}>{c.name}</span>
+                                                    </div>
+                                                    {activeCourseId === c.id && <Check size={14} className="text-emerald-600 shrink-0" />}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                    <div className="shrink-0 bg-gray-100 p-1 rounded-md text-gray-500 group-hover:bg-green-100 group-hover:text-green-700 transition-colors ml-2">
-                                        <ChevronDown
-                                            size={18}
-                                            className={`transition-transform duration-300 ${isCourseMenuOpen ? 'rotate-180' : ''}`}
-                                        />
-                                    </div>
-                                </button>
-
-                                {/* Dropdown Menu Overlay */}
-                                {isCourseMenuOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-40 bg-gray-900/10 backdrop-blur-[1px] md:bg-transparent"
-                                            onClick={() => setIsCourseMenuOpen(false)}
-                                        />
-                                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <div className="px-4 py-2.5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">My Classes</h3>
-                                                <span className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{courses.length}</span>
-                                            </div>
-                                            <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-1">
-                                                {courses.map(c => {
-                                                    const isActive = activeCourseId === c.id;
-                                                    return (
-                                                        <button
-                                                            key={c.id}
-                                                            onClick={() => handleCourseChange(c.id)}
-                                                            className={`w-full text-left px-3 py-3 my-1 rounded-lg transition-all duration-200 flex items-center justify-between group ${isActive ? 'bg-green-50/80 ring-1 ring-green-500/20' : 'hover:bg-gray-50'}`}
-                                                        >
-                                                            <div className="flex items-start gap-3 min-w-0 pr-2">
-                                                                <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gray-300 group-hover:bg-gray-400'}`} />
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className={`font-semibold text-sm truncate leading-tight ${isActive ? 'text-green-800' : 'text-gray-700'}`}>
-                                                                        {c.name}
-                                                                    </div>
-                                                                    {(c.section || c.room) && (
-                                                                        <div className="text-[11px] text-gray-500 mt-1 flex items-center gap-1.5 font-medium">
-                                                                            {c.section && <span className="bg-gray-100 px-1.5 py-0.5 rounded">Sec {c.section}</span>}
-                                                                            {c.room && <span className="bg-gray-100 px-1.5 py-0.5 rounded">Rm {c.room}</span>}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            {isActive && (
-                                                                <div className="shrink-0 bg-green-100 text-green-600 p-1 rounded-full">
-                                                                    <Check size={14} strokeWidth={3} />
-                                                                </div>
-                                                            )}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="text-sm text-gray-400 animate-pulse bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-                                {language === 'th' ? 'กำลังโหลดรายวิชา...' : 'Loading your classes...'}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Center: Branding (Now serves as a subtle header logo) */}
-                    <div className="flex items-center justify-center gap-3 w-full md:w-1/3 order-1 md:order-2 mb-2 md:mb-0">
-                        <img src="/logos/dce_logo.png" alt="Classroom Companion" className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 transition-opacity" />
-                        <div className="hidden lg:block min-w-0 overflow-hidden text-center">
-                            <h1 className="text-sm font-bold text-gray-800 truncate leading-tight">
-                                {t('brand.name')}
-                            </h1>
-                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('dashboard.instructorWorkspace')}</p>
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    {/* Right: Actions & Profile */}
-                    <div className="flex items-center justify-end w-full md:w-1/3 order-3 md:order-3 gap-3">
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-5">
                         <LanguageToggle />
-                        {loading && <span className="hidden md:inline text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md animate-pulse">{language === 'th' ? 'กำลังซิงก์...' : 'Syncing...'}</span>}
-                        <div className="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
-                        <button
-                            onClick={onLogout}
-                            className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
-                            title={t('dashboard.signOut')}
-                        >
-                            <LogOut size={20} className="group-hover:-translate-x-0.5 transition-transform" />
-                            <span className="hidden xl:inline text-sm font-semibold ml-2">{t('dashboard.signOut')}</span>
-                        </button>
-                        {user?.photoUrl ? (
-                            <img src={user.photoUrl} alt="Profile" className="h-9 w-9 rounded-full border-2 border-gray-100 shadow-sm object-cover" />
-                        ) : (
-                            <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white font-bold shadow-sm">
-                                {user?.name?.charAt(0) || 'T'}
+                        <div className="h-8 w-px bg-slate-100 hidden md:block"></div>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden lg:block text-right">
+                                <p className="text-xs font-black text-slate-800 leading-none mb-1">{user?.name}</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Instructor</p>
                             </div>
-                        )}
+                            <div className="relative">
+                                <img src={user?.photoUrl || `https://ui-avatars.com/api/?name=T&background=10b981&color=fff`} alt="Profile" className="w-10 h-10 rounded-2xl ring-4 ring-emerald-50 shadow-md object-cover" />
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm">
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                </div>
+                            </div>
+                            <button onClick={onLogout} className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-slate-100 hover:border-rose-100">
+                                <LogOut size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <main className="flex-1 p-4 md:p-6 xl:p-5 max-w-6xl 2xl:max-w-7xl mx-auto w-full space-y-8">
-
-                {/* 1. Overview Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 xl:gap-4">
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">{language === 'th' ? 'นักเรียนทั้งหมด' : 'Total Students'}</p>
-                            <div className="flex items-baseline gap-2 mt-1">
-                                <h3 className="text-3xl font-bold">{stats.totalStudents}</h3>
-                                <span className="text-xs text-green-600 font-medium px-2 py-0.5 bg-green-50 rounded-full">{language === 'th' ? 'กำลังใช้งาน' : 'Active'}</span>
-                            </div>
+            <main className="flex-1 p-6 md:p-10 xl:p-8 max-w-7xl 2xl:max-w-[1440px] mx-auto w-full space-y-10">
+                
+                {/* 1. Overview Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    {/* Metric Card: Students */}
+                    <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500 border-b-4 border-b-indigo-500/50">
+                        <div className="absolute -bottom-6 -right-6 text-indigo-500/5 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700">
+                            <Users size={160} />
                         </div>
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                            <Users size={24} />
+                        <div className="relative z-10">
+                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl inline-flex mb-6 shadow-indigo-100 shadow-lg">
+                                <LayoutDashboard size={24} />
+                            </div>
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{language === 'th' ? 'นักเรียนทั้งหมด' : 'Total Students'}</p>
+                            <div className="flex items-baseline gap-3">
+                                <h3 className="text-5xl font-black text-slate-900 tracking-tighter">{stats.totalStudents}</h3>
+                                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-full border border-emerald-100 uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    {language === 'th' ? 'กำลังใช้งาน' : 'Synced'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-
-
-                    <div className={`p-6 rounded-xl border shadow-sm flex items-center justify-between ${stats.atRiskCount > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
-                        <div>
-                            <p className={`text-sm font-medium uppercase tracking-wide ${stats.atRiskCount > 0 ? 'text-red-600' : 'text-gray-500'}`}>{language === 'th' ? 'ต้องติดตาม' : 'Attention Needed'}</p>
-                            <div className="flex items-baseline gap-2 mt-1">
-                                <h3 className={`text-3xl font-bold ${stats.atRiskCount > 0 ? 'text-red-700' : 'text-gray-800'}`}>{stats.atRiskCount}</h3>
-                                <span className="text-xs text-red-600/80 font-medium">{language === 'th' ? 'นักเรียนที่เสี่ยง' : 'Students At-Risk'}</span>
-                            </div>
+                    {/* Metric Card: Attention */}
+                    <div className={`p-8 rounded-[2rem] border relative overflow-hidden group hover:shadow-xl transition-all duration-500 border-b-4 ${stats.atRiskCount > 0 ? 'bg-rose-50/50 border-rose-100 border-b-rose-500/50 hover:shadow-rose-500/5' : 'bg-white border-slate-100 border-b-slate-300/50'}`}>
+                        <div className={`absolute -bottom-6 -right-6 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700 ${stats.atRiskCount > 0 ? 'text-rose-500/5' : 'text-slate-500/5'}`}>
+                            <AlertTriangle size={160} />
                         </div>
-                        <div className={`p-3 rounded-lg ${stats.atRiskCount > 0 ? 'bg-red-200 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
-                            <AlertTriangle size={24} />
+                        <div className="relative z-10">
+                            <div className={`p-3 rounded-2xl inline-flex mb-6 shadow-lg ${stats.atRiskCount > 0 ? 'bg-rose-100 text-rose-600 shadow-rose-100' : 'bg-slate-100 text-slate-400 shadow-slate-100'}`}>
+                                <Target size={24} />
+                            </div>
+                            <p className={`text-[11px] font-black uppercase tracking-[0.2em] mb-2 ${stats.atRiskCount > 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                                {language === 'th' ? 'สถานะการส่งงาน' : 'Attention Monitor'}
+                            </p>
+                            <div className="flex items-baseline gap-3">
+                                <h3 className={`text-5xl font-black tracking-tighter ${stats.atRiskCount > 0 ? 'text-rose-700' : 'text-slate-900'}`}>{stats.atRiskCount}</h3>
+                                <span className={`px-3 py-1 text-[10px] font-black rounded-full border uppercase tracking-widest whitespace-nowrap shadow-sm ${stats.atRiskCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                    {language === 'th' ? 'นักเรียนที่ต้อดูแล' : 'Requires Focus'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. At-Risk Panel (Main Focal Point) */}
-                <div className="w-full min-h-[400px]">
+                {/* 2. At-Risk Component */}
+                <div className="w-full">
                     <AtRiskPanel students={students} assignments={assignments} submissions={submissions} />
                 </div>
 
-                {/* 3. Student Roster Table */}
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center flex-wrap gap-3">
-                        <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-gray-700">{language === 'th' ? 'รายชื่อนักเรียนและการส่งงาน' : 'Student Roster & Tracking'}</h3>
-                            <div className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{students.length} {language === 'th' ? 'คน' : 'Students'}</div>
+                {/* 3. Modern Data Table */}
+                <div className="bg-white border border-slate-100 rounded-[2rem] shadow-sm overflow-hidden">
+                    <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-gradient-to-br from-white to-slate-50/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2 bg-slate-900 text-white rounded-xl shadow-lg">
+                                <Search size={18} />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-slate-800 text-lg tracking-tighter leading-none">
+                                    {language === 'th' ? 'รายชื่อนักเรียน' : 'Student Performance Grid'}
+                                </h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Full course synchronization active</p>
+                            </div>
+                        </div>
+                        <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                            {students.length} Total Users
                         </div>
                     </div>
+
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
-                                <tr>
-                                    <th className="px-6 py-3">{language === 'th' ? 'ชื่อนักเรียน' : 'Student Name'}</th>
-                                    <th className="px-6 py-3 min-w-[150px]">{language === 'th' ? 'ความคืบหน้าการส่งงาน' : 'Completion Progress'}</th>
-                                    <th className="px-6 py-3 text-center">{language === 'th' ? 'งานค้างส่ง' : 'Missing Work'}</th>
-                                    <th className="px-6 py-3 text-center">{language === 'th' ? 'สถานะ' : 'Status'}</th>
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/40">
+                                    <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">{language === 'th' ? 'ชื่อนักเรียน' : 'Student Profile'}</th>
+                                    <th className="px-8 py-5 text-left text-[11px] font-black text-slate-400 uppercase tracking-wider">{language === 'th' ? 'ความก้าวหน้า' : 'Work Progress'}</th>
+                                    <th className="px-8 py-5 text-center text-[11px] font-black text-slate-400 uppercase tracking-wider">{language === 'th' ? 'ค้างส่ง' : 'Missing'}</th>
+                                    <th className="px-8 py-5 text-right text-[11px] font-black text-slate-400 uppercase tracking-wider">{language === 'th' ? 'สถานะล่าสุด' : 'Current Status'}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {students.length > 0 ? (
-                                    students.map((student) => {
-                                        const isAtRisk = student.missingAssignmentsCount >= 3;
-                                        const completionPercentage = assignments.length > 0 ? Math.round(((student.completedAssignmentsCount || 0) / assignments.length) * 100) : 0;
-                                        return (
-                                            <tr key={student.id} className={`hover:bg-gray-50 transition-colors ${isAtRisk ? 'bg-red-50/30' : ''}`}>
-                                                <td className="px-6 py-4 flex items-center gap-3">
-                                                    <StudentAvatar url={student.avatarUrl} name={student.name} className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
-                                                    <span className="font-medium text-gray-700 truncate min-w-0 max-w-[120px]">{student.name}</span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-full max-w-[100px] h-2.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                                                            <div
-                                                                className={`h-full rounded-full transition-all duration-500 ${completionPercentage === 100 ? 'bg-green-500' : 'bg-blue-500'}`}
-                                                                style={{ width: `${completionPercentage}%` }}
-                                                            />
-                                                        </div>
-                                                        <span className="text-xs font-semibold whitespace-nowrap text-gray-600 block w-8">
-                                                            {student.completedAssignmentsCount}/{assignments.length}
-                                                        </span>
+                            <tbody className="divide-y divide-slate-50">
+                                {students.map((student) => {
+                                    const isAtRisk = student.missingAssignmentsCount >= 2;
+                                    const completionPercentage = assignments.length > 0 ? Math.round(((student.completedAssignmentsCount || 0) / assignments.length) * 100) : 0;
+                                    
+                                    return (
+                                        <tr key={student.id} className="group hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-4">
+                                                    <StudentAvatar url={student.avatarUrl} name={student.name} className="w-10 h-10 rounded-2xl shadow-sm border border-slate-100 object-cover group-hover:scale-110 transition-transform" />
+                                                    <span className="font-extrabold text-slate-800 text-sm">{student.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex-1 max-w-[140px] h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 shadow-inner">
+                                                        <div 
+                                                            className={`h-full rounded-full transition-all duration-700 ${completionPercentage === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`} 
+                                                            style={{ width: `${completionPercentage}%` }}
+                                                        />
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    {student.missingAssignmentsCount > 0 ? (
-                                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 font-bold text-xs">
-                                                            {student.missingAssignmentsCount}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-gray-400">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    {isAtRisk ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                                            <AlertTriangle size={12} /> {language === 'th' ? 'ต้องติดตาม' : 'At Risk'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                            <AlertTriangle size={12} className="hidden" /> {language === 'th' ? 'ปกติ' : 'On Track'}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                ) : (
-                                    <tr>
-                                        <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                                            {language === 'th' ? 'ไม่พบนักเรียนในรายวิชานี้' : 'No students found in this course.'}
-                                        </td>
-                                    </tr>
-                                )}
+                                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100">
+                                                        {student.completedAssignmentsCount}/{assignments.length}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-5 text-center">
+                                                {student.missingAssignmentsCount > 0 ? (
+                                                    <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-xl bg-rose-50 text-rose-600 font-extrabold text-xs shadow-sm border border-rose-100 animate-pulse">
+                                                        {student.missingAssignmentsCount}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-300 font-black text-xs">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-8 py-5 text-right">
+                                                {isAtRisk ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-orange-50 text-orange-700 text-[11px] font-black border border-orange-100 uppercase tracking-wider shadow-sm">
+                                                        <AlertTriangle size={12} />
+                                                        {language === 'th' ? 'ต้องติดตาม' : 'Intervention'}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[11px] font-black border border-emerald-100 uppercase tracking-wider shadow-sm">
+                                                        <Sparkles size={12} />
+                                                        {language === 'th' ? 'ปกติ' : 'Stable'}
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </main>
         </div>
     );

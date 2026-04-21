@@ -97,10 +97,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                         </div>
 
                         {/* Global Progress (Right) */}
-                        <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-[2rem] p-8 shadow-2xl flex flex-col items-center justify-center h-[600px] relative overflow-hidden group">
-                            {/* Background Accents */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-[80px] rounded-full"></div>
-                            <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+                        <div className="lg:col-span-1 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col items-center justify-center h-[600px] relative overflow-hidden group">
+                            {/* Background Accents (Subtle) */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/[0.03] blur-[60px] rounded-full"></div>
+                            <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-500/[0.03] blur-[80px] rounded-full"></div>
 
                             <h3 className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] mb-12 relative z-10">{t('dashboard.overallProgress')}</h3>
                             <div className="relative z-10 transform transition-transform duration-700 group-hover:scale-110">
@@ -108,7 +108,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                             </div>
                             
                             <div className="mt-12 relative z-10">
-                                <p className="text-center text-sm text-white font-extrabold px-6 leading-relaxed mb-4">
+                                <p className="text-center text-sm text-slate-700 font-extrabold px-6 leading-relaxed mb-4">
                                     {globalCompletion === 100 
                                         ? (language === 'th' ? 'สมบูรณ์แบบ! คุณส่งงานครบทุกชิ้นแล้ว' : 'Perfect! You have completed everything.')
                                         : globalCompletion >= 60
@@ -122,7 +122,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                                             (globalCompletion >= 100) ? 'w-6 bg-emerald-500' :
                                             (globalCompletion >= 60 && i <= 2) ? 'w-6 bg-amber-500' :
                                             (globalCompletion < 60 && i <= 1) ? 'w-6 bg-rose-500' :
-                                            'w-2 bg-slate-700'
+                                            'w-2 bg-slate-200'
                                         }`}></div>
                                     ))}
                                 </div>

@@ -48,7 +48,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
 
                 {/* Background Track Circle */}
                 <circle
-                    stroke="#1e293b" // slate-800 for dark mode compatibility
+                    stroke="#f1f5f9" // slate-100 for light mode
                     strokeWidth={strokeWidth}
                     fill="transparent"
                     r={radius}
@@ -74,7 +74,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none antialiased">
                 <div className="flex items-baseline gap-1 drop-shadow-xl">
-                    <motion.span className="text-6xl font-black tracking-tighter text-white">
+                    <motion.span className="text-6xl font-black tracking-tighter text-slate-800">
                         {rounded}
                     </motion.span>
                     <span className="text-2xl font-black text-slate-400">%</span>

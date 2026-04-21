@@ -51,18 +51,20 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
 
     // Apply filters
     const filteredAssignments = useMemo(() => {
-        let filtered = enhancedAssignments;
+        // Only show assignments that are NOT turned in
+        const todoItems = enhancedAssignments.filter(a => !a.isTurnedIn);
+        let filtered = todoItems;
 
         if (filter === 'TODAY') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue === 0);
+            filtered = todoItems.filter(a => a.daysUntilDue === 0);
         } else if (filter === 'SOON') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 7);
+            filtered = todoItems.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 7);
         } else if (filter === 'NO_DUE') {
-            filtered = enhancedAssignments.filter(a => a.dueDateObj === null);
+            filtered = todoItems.filter(a => a.dueDateObj === null);
         }
 
         if (filter !== 'ALL' && filter !== 'NO_DUE') {
-            const pastDueList = enhancedAssignments.filter(a => a.isPastDue);
+            const pastDueList = todoItems.filter(a => a.isPastDue);
             filtered = [...pastDueList, ...filtered];
             filtered = Array.from(new Set(filtered));
         }
