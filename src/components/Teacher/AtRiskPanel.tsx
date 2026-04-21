@@ -195,11 +195,6 @@ const AtRiskPanel: React.FC<AtRiskPanelProps> = ({ students, assignments, submis
                                                 </div>
                                             </div>
                                             
-                                            <div className="mt-4 flex justify-end">
-                                                <button className="text-xs font-bold text-red-600 hover:text-red-700 hover:underline px-2 py-1 transition-colors">
-                                                    {language === 'th' ? 'ส่งข้อความเตือน (เร็วๆ นี้)' : 'Send Reminder (Coming Soon)'}
-                                                </button>
-                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
