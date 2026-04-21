@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { 
-    Sparkles, 
-    ShieldCheck, 
-    Heart, 
-    ArrowRight, 
-    Layers, 
-    Fingerprint 
+import {
+    Sparkles,
+    ShieldCheck,
+    Heart,
+    ArrowRight,
+    Layers,
+    Fingerprint
 } from 'lucide-react';
 import type { UserProfile } from '../../types';
 import { fetchUserProfile } from '../../services/googleClassroom';
@@ -33,7 +33,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     const handleGlobalMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const { clientX, clientY } = e;
         const { innerWidth, innerHeight } = window;
-        const offsetX = (clientX - innerWidth / 2) / 50; 
+        const offsetX = (clientX - innerWidth / 2) / 50;
         const offsetY = (clientY - innerHeight / 2) / 50;
         setBgOffset({ x: offsetX, y: offsetY });
     };
@@ -89,7 +89,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     }
 
     return (
-        <div 
+        <div
             className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden bg-[#fafafa]"
             onMouseMove={handleGlobalMouseMove}
         >
@@ -97,14 +97,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             <ParticleBackground />
 
             {/* Premium Ambient Layers */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 pointer-events-none transition-transform duration-500 ease-out opacity-40"
                 style={{ transform: `translate(${bgOffset.x}px, ${bgOffset.y}px)` }}
             >
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100 rounded-full blur-[120px] animate-pulse"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-50 rounded-full blur-[120px] animate-pulse delay-700"></div>
             </div>
-            
+
             <div className="w-full max-w-6xl bg-white/70 backdrop-blur-3xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col lg:flex-row relative z-10 border border-white/60">
 
                 {/* Left Side: The "Classroom Companion" Principle */}
@@ -132,7 +132,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 <div className="h-10 w-px bg-white/10 mt-[-20px]"></div>
                                 <div className="flex flex-col items-center gap-2">
                                     <div className="p-2 bg-white rounded-2xl shadow-lg ring-1 ring-slate-200">
-                                        <img src="/logos/dce_logo.png" alt="DCE" className="h-10 w-auto" />
+                                        <img src="/logos/dce_logo.png" alt="CED" className="h-10 w-auto" />
                                     </div>
                                     <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest text-center leading-tight">DCE</span>
                                 </div>
@@ -148,7 +148,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 Classroom<br />
                                 <span className="text-emerald-400">Companion</span>
                             </h1>
-                            
+
                             <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-md font-medium pr-8">
                                 {language === 'th'
                                     ? 'พื้นที่จัดการเรียนการสอนที่ถูกปรับแต่งมาเป็นพิเศษ เพื่อการติดตามงานและวัดผลอย่างมีประสิทธิภาพ'
@@ -172,14 +172,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 </div>
 
                 {/* Right Side: Identity Selection */}
-                <div 
+                <div
                     ref={loginFormRef}
                     onMouseMove={handleFormMouseMove}
                     onMouseLeave={handleFormMouseLeave}
                     className="flex-1 p-8 sm:p-12 md:p-16 flex flex-col justify-center relative bg-white"
                 >
                     {/* Interactive Spotlight Aura */}
-                    <div 
+                    <div
                         className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-500 opacity-30"
                         style={{
                             background: `radial-gradient(600px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(16, 185, 129, 0.15), transparent 80%)`
@@ -199,7 +199,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                        
+
                         {/* Student Portal Card */}
                         <div className="group relative">
                             <div className="absolute inset-0 bg-emerald-500/5 rounded-[2.5rem] scale-[0.98] group-hover:scale-105 group-hover:bg-emerald-500/10 blur-xl transition-all duration-500"></div>
@@ -209,8 +209,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">{t('login.studentMode')}</h3>
                                 <p className="text-sm text-slate-500 leading-relaxed mb-8 flex-1">
-                                    {language === 'th' 
-                                        ? 'จัดลำดับงานสำคัญ ดูข้อมูลวิเคราะห์รายบุคคล และติดตามความก้าวหน้าของคุณ' 
+                                    {language === 'th'
+                                        ? 'จัดลำดับงานสำคัญ ดูข้อมูลวิเคราะห์รายบุคคล และติดตามความก้าวหน้าของคุณ'
                                         : 'Prioritize tasks, see personalized insights, and keep track of your learning journey.'}
                                 </p>
                                 <button
@@ -240,8 +240,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">{t('login.instructor')}</h3>
                                 <p className="text-sm text-slate-500 leading-relaxed mb-8 flex-1">
-                                    {language === 'th' 
-                                        ? 'ติดตามผลการเรียน ค้นหานักเรียนที่อาจต้องการการดูแล และบริหารคลาสง่ายขึ้น' 
+                                    {language === 'th'
+                                        ? 'ติดตามผลการเรียน ค้นหานักเรียนที่อาจต้องการการดูแล และบริหารคลาสง่ายขึ้น'
                                         : 'Analyze performance, identify at-risk students, and manage your classes seamlessly.'}
                                 </p>
                                 <button
