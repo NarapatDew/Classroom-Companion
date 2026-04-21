@@ -9,7 +9,7 @@ interface UnifiedTodoProps {
     submissions: Submission[];
 }
 
-type FilterType = 'ALL' | 'TODAY' | '3DAYS' | '7DAYS';
+type FilterType = 'ALL' | 'TODAY' | 'SOON' | 'NO_DUE';
 
 const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submissions }) => {
     const { t, language } = useLanguage();
@@ -70,15 +70,15 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
 
         if (filter === 'TODAY') {
             filtered = enhancedAssignments.filter(a => a.daysUntilDue === 0);
-        } else if (filter === '3DAYS') {
-            filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 3);
-        } else if (filter === '7DAYS') {
+        } else if (filter === 'SOON') {
             filtered = enhancedAssignments.filter(a => a.daysUntilDue !== null && a.daysUntilDue >= 0 && a.daysUntilDue <= 7);
+        } else if (filter === 'NO_DUE') {
+            filtered = enhancedAssignments.filter(a => a.dueDateObj === null);
         }
 
         // Include past due by default in all views unless it gets too much? 
         // We'll bring past due items to the top if they are missing
-        if (filter !== 'ALL') {
+        if (filter !== 'ALL' && filter !== 'NO_DUE') {
             const pastDueList = enhancedAssignments.filter(a => a.isPastDue);
             filtered = [...pastDueList, ...filtered];
             // Remove duplicates (if any logic flaw)
@@ -167,8 +167,8 @@ const UnifiedTodo: React.FC<UnifiedTodoProps> = ({ courses, assignments, submiss
                         {[
                             { key: 'ALL', label: t('todo.filterAll') },
                             { key: 'TODAY', label: t('todo.filterToday') },
-                            { key: '3DAYS', label: t('todo.filter3Days') },
-                            { key: '7DAYS', label: t('todo.filter7Days') },
+                            { key: 'SOON', label: t('todo.filterSoon') },
+                            { key: 'NO_DUE', label: t('todo.filterNoDue') },
                         ].map(f => (
                             <button
                                 key={f.key}

@@ -22,6 +22,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
     const completedAssignments = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED').length;
     const globalCompletion = totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0;
 
+    const getProgressColor = (percent: number) => {
+        if (percent === 100) return '#10b981'; // Green
+        if (percent >= 60) return '#f59e0b'; // Yellow
+        return '#ef4444'; // Red
+    };
+
     // Separate Active Courses
     const activeCourses = courses.filter(c => c.courseState === 'ACTIVE' || !c.courseState); // Default to active if undefined
 
@@ -82,9 +88,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ user, courses, assign
                         {/* Global Progress (Right) */}
                         <div className="lg:col-span-1 bg-white border border-border rounded-lg p-6 shadow-card flex flex-col items-center justify-center h-[600px]">
                             <h3 className="text-muted text-sm font-bold uppercase tracking-wider mb-8">{t('dashboard.overallProgress')}</h3>
-                            <ProgressRing percentage={globalCompletion} color="#188038" size={180} strokeWidth={10} />
-                            <p className="mt-10 text-center text-sm text-text font-medium">
-                                {language === 'th' ? 'ทำได้ดีมาก รักษาความต่อเนื่องไว้!' : "You're doing great! Keep keeping up."}
+                            <ProgressRing percentage={globalCompletion} color={getProgressColor(globalCompletion)} size={180} strokeWidth={10} />
+                            <p className="mt-10 text-center text-sm text-text font-medium px-4">
+                                {globalCompletion === 100 
+                                    ? (language === 'th' ? 'สมบูรณ์แบบ! คุณส่งงานครบทุกชิ้นแล้ว' : 'Perfect! You have completed everything.')
+                                    : globalCompletion >= 60
+                                        ? (language === 'th' ? 'ทำได้ดีมาก! อีกนิดเดียวจะครบแล้ว' : 'Great job! You are almost there.')
+                                        : (language === 'th' ? 'พยายามเข้า! ยังมีงานที่ต้องส่งอยู่นะ' : 'Keep going! There are still tasks to submit.')
+                                }
                             </p>
                         </div>
                     </div>

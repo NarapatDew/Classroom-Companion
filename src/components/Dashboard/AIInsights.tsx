@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Bot, Sparkles, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { BarChart3, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import type { Assignment, Submission } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -9,7 +9,7 @@ interface AIInsightsProps {
 }
 
 const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => {
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
 
     const analysis = useMemo(() => {
         const now = new Date();
@@ -102,13 +102,12 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg shadow-inner">
-                        <Bot size={20} />
+                        <BarChart3 size={20} />
                     </div>
                     <h3 className="font-bold text-gray-800 tracking-tight whitespace-nowrap">
-                        {language === 'th' ? 'AI วิเคราะห์การเรียน' : 'AI Insights'}
+                        {t('insight.title')}
                     </h3>
                 </div>
-                <Sparkles size={16} className="text-indigo-400 animate-pulse" />
             </div>
             
             <div className="p-5 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5">
