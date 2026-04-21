@@ -15,7 +15,11 @@ const AIInsights: React.FC<AIInsightsProps> = ({ assignments, submissions }) => 
         const total = assignments.length;
         if (total === 0) return { consistency: 0, onTimeRate: 100, missingCount: 0, lateCount: 0 };
 
-        const turnedIn = submissions.filter(s => s.state === 'TURNED_IN' || s.state === 'RETURNED');
+        const activeAssignmentIds = new Set(assignments.map(a => a.id));
+        const turnedIn = submissions.filter(s => 
+            activeAssignmentIds.has(s.courseWorkId) && 
+            (s.state === 'TURNED_IN' || s.state === 'RETURNED')
+        );
         const turnedInCount = turnedIn.length;
         const missingCount = assignments.filter(a => {
             const s = submissions.find(sub => sub.courseWorkId === a.id);
